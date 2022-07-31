@@ -1,0 +1,8 @@
+"0","files <- list.files( pattern = "".csv"")"
+"0"," x <- numeric()"
+"0","    for (i in 1:3) {"
+"0","        df <- read.csv( file =  files[i])"
+"0","        x <- c(x, df[[""nitrate""]])"
+"0","    }"
+"2","Error in file(file, ""rt"") : invalid 'description' argument
+"

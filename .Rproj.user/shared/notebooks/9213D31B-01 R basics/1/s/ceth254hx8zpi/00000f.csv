@@ -1,0 +1,9 @@
+"0","args(list.files)"
+"1","function (path = ""."", pattern = NULL, all.files = FALSE, full.names = FALSE, 
+"
+"1","    recursive = FALSE, ignore.case = FALSE, include.dirs = FALSE, 
+"
+"1","    no.. = FALSE) 
+"
+"1","NULL
+"

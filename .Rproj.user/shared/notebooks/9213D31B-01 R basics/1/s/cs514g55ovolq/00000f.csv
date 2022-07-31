@@ -1,0 +1,7 @@
+"0","myfiles <- list.files(path=""testdir"", "
+"0","                      pattern = ""^my"")"
+"0","myfiles[2]"
+"1","[1]"
+"1"," ""mytest4.R"""
+"1","
+"

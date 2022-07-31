@@ -1,0 +1,7 @@
+"0","df2 <- within(df2, "
+"0","              { newcol = ""No"""
+"0","              newcol[Type %in% c(""fruit"")] = ""No"""
+"0","              newcol[Name %in% c( ""green apple"")] = ""Yes"""
+"0","})"
+"0",""
+"0","head(df2, 3)"

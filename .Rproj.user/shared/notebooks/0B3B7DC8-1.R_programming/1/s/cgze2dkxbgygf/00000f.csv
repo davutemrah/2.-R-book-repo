@@ -1,0 +1,5 @@
+"0","# create a dataframe"
+"0","df2 <- data.frame(Type = c(""fruit"", ""fruit"",""fruit"", ""veggie"",""veggie""),"
+"0","                  Name = c(""red apple"", ""green apple"", ""red apple"", ""green apple"" ,""red apple""), Color = c(NA, ""red"", ""blue"", ""yellow"", ""red""))"
+"0",""
+"0","df2"

@@ -1,0 +1,4 @@
+"0","setwd(""testdir"")"
+"2","Warning:"
+"2"," The working directory was changed to /Users/deayan/Desktop/GITHUB/2. R book repo/testdir inside a notebook chunk. The working directory will be reset when the chunk is finished running. Use the knitr root.dir option in the setup chunk to change the working directory for notebook chunks.
+"

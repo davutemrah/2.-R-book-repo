@@ -1,0 +1,4 @@
+"0","detach(ggplot2, unload = TRUE)  
+"
+"2","Error in detach(ggplot2, unload = TRUE) : invalid 'name' argument
+"

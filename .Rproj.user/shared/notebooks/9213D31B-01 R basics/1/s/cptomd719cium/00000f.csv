@@ -1,0 +1,6 @@
+"0","# test if value 5 in speed column"
+"0","5 %in% df$speed"
+"1","[1]"
+"1"," FALSE"
+"1","
+"

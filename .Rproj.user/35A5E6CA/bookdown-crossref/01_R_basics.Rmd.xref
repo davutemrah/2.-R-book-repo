@@ -1,0 +1,45 @@
+h1:r-programming R Programming
+h2:general-information General Information
+h3:cleaning-the-environment Cleaning the environment
+h3:installing-a-package Installing a package
+h3:browsing-help-on-packages Browsing help on packages
+h3:directories Directories
+h3:list-specific-files List specific files
+h3:working-directory Working Directory
+h3:create-a-new-file Create a new file
+h3:show-file-info Show file info
+h3:listing-files-in-a-directory Listing files in a directory
+h3:renaming-a-file renaming a file
+h3:copy-a-file-from-and-to copy a file from and to
+h3:file-path file path
+h3:show-arguments-of-a-function Show arguments of a function
+h3:this-needs-more-context-and-examples this needs more context and examples
+h2:create-data Create Data
+h3:create-sequence-of-numbers Create sequence of numbers
+h3:short-cuts short cuts
+h3:in-statement %in% statement
+h3:which-function  function
+h3:where-is-the-min-max-first-truefalse Where is the min, max, first true/false?
+h3:matcha-b-function  function
+h2:create-a-data-frame Create a Data Frame
+h1:logic-statements Logic statements
+h1:be-careful be careful
+h2:matrices-and-data-frames matrices and data frames
+h1:vectors-contain-one-class-of-data Vectors contain one class of data
+h1:convert-vector-to-a-matrix Convert vector to a Matrix
+h1:creating-a-matrix Creating a Matrix
+h1:create-a-character-vector Create a character vector
+h1:column-bind column bind
+h1:r-recycles-if-columns-are-not-equal R recycles if columns are not equal
+h1:create-and-variable-names Create and ; variable names
+h1:assign-column-names assign column names
+h1:reorder-the-variable-names reorder the variable names
+h1:reordering-columns Reordering columns
+h1:adding-a-new-column Adding a new column
+h1:operators operators
+h1:categorical-variables Categorical variables
+h1:logical-values Logical Values
+h1:integer-value Integer Value
+h1:character-values Character Values
+h1:basics Basics
+

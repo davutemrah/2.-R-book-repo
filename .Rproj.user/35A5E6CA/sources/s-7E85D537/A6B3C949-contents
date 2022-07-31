@@ -1,0 +1,847 @@
+
+# R Programming
+
+R is a functional programming language. It is most popular among academia and Data Scientists.
+
+## General Information
+
+### Cleaning the environment
+
+```{r, eval=FALSE}
+rm(list = ls())
+```
+### Installing a package
+
+```{r, eval=FALSE}
+# install
+install.packages("ggplot2")  
+
+# removing the library 
+detach(ggplot2, unload = TRUE)  
+```
+
+### Browsing help on packages
+
+```{r, eval=FALSE}
+browseVignettes("ggplot2")
+```
+
+
+
+### Directories
+
+Get working directory. Don't worry if you already create a project and working in the project directory.
+
+I can assign the path to an object.
+
+```{r, eval=FALSE}
+wd <- getwd()
+wd
+```
+
+Listing environment objects
+
+```{r, eval=FALSE}
+ls()
+```
+
+I can list files in the working directory and assign it to an object
+
+```{r, eval=FALSE}
+files <- list.files()
+head(files)
+```
+
+Alternative way to list files in the working directory
+
+```{r, eval=FALSE}
+files2 <- dir()
+head(files2)
+```
+
+
+### List specific files
+
+Let's check the arguments of `dir` function.
+
+```{r, eval=FALSE}
+args(dir)
+```
+
+```{r, eval=FALSE}
+dir(pattern = "^R_", full.names = F, ignore.case = T )
+```
+
+Create a new folder in the WD
+
+```{r, warning=FALSE, eval=FALSE}
+old.dir <- getwd()
+dir.create("testdir")
+```
+
+### Working Directory
+
+As warning shows, this is not the best way to change WD in code chunk. Changing in the global options is a better way, unless you work in a project folder.
+
+```{r, eval=FALSE}
+setwd("testdir")
+```
+
+### Create a new file
+
+```{r}
+file.create("testdir/mytest.R")
+```
+
+Check if a file exits. Interactive
+
+```{r, eval=FALSE}
+file.exists("testdir/mytest.R")
+
+### Sample usage
+if(!file.exists("testdir/mytest.R")){
+  print("File not exist!")
+  } else {
+    "File exists!"}
+```
+
+### Show file info
+
+```{r}
+file.info("testdir/mytest.R")
+```
+
+### Listing files in a directory
+
+```{r}
+args(list.files)
+```
+Let's list all the files that their names starts with "my"
+```{r}
+myfiles <- list.files(path="testdir", 
+                      pattern = "^my")
+
+
+### print the second file in myfiles
+myfiles[2]
+```
+
+### renaming a file 
+
+```{r}
+args(file.rename)
+```
+
+
+```{r, eval=FALSE}
+file.rename("testdir/mytest.R", "testdir/mytest10.R")
+```
+
+### copy a file from and to
+
+```{r, eval=FALSE}
+file.copy("testdir/mytest2.R", "testdir/mytest3.R")
+```
+
+### file path
+Assign a name to a file path (It does not matter if file exists or not)
+
+```{r, eval=FALSE}
+path1 <- file.path(to = "new/mytest3.R")
+path1
+```
+
+Alternative way to assign name to a file path
+
+```{r, eval=FALSE}
+
+abc <- file.path(from="new2", to="mytest3.R")
+abc
+```
+
+Create a directory: testdir/new
+
+```{r, eval=FALSE}
+dir.create(file.path("testdir", "new"), recursive = TRUE )
+```
+
+
+### Show arguments of a function
+
+```{r, eval=FALSE}
+str(file.path)
+args((file.path))
+```
+
+### this needs more context and examples
+
+Change the search path so that you can use variable names directly 
+
+But this is not a practical way. 
+```{r, eval=FALSE}
+attach(mtcars)
+detach(mtcars)
+```
+
+Best alternative is to use `with()` function
+
+<!--chapter:end:0.General/01-Genel_Intro.Rmd-->
+
+
+## Create Data
+
+### Create sequence of numbers
+
+
+```{r}
+a <- seq(from = 5, to = 14, by = 2)
+a
+```
+
+```{r}
+seq(10, 20) ## default increment is 1
+seq(10, 30, by =2)
+```
+
+take the length from the length of this argument.   
+
+So, this will create a sequence `starting from 1 to 100 with length = 10`
+
+```{r}
+seq(1, 100, along.with = 1:4)
+```
+
+desired length of the sequence. 
+
+```{r}
+seq(1, 100, length.out = 4)
+```
+
+### short cuts
+
+This will create a sequence starting from 1 with length equal to the length of the argument.
+
+```{r}
+seq_along(1:10)
+```
+
+This will create a sequence starting from 1 with length equal to the argument.
+
+```{r}
+seq_len(20)
+```
+
+###  %in% statement
+
+This creates a logical vector, where testing each element in vector "a" if ever matches any element in vector "b"
+
+```{r}
+## lets create a sequence
+a = seq_len(10)
+
+## test which elements of a is included in the list
+a %in% c(2, 4, 6, 8, 0)
+```
+
+print the elements of `list a` that is included in the given list
+
+```{r}
+a[a %in% c(2, 4, 6, 8, 0)]
+```
+
+**We can negate this logical statement**
+
+```{r}
+# sub-setting property
+
+a[ ! (a %in% c(2, 4, 6, 8, 0))]
+```
+
+
+### `which()` function
+
+`which(x, arr.ind = FALSE, useNames = TRUE)`
+
+**x:** input is a logical statement
+
+vector returns location index of true values
+
+Here, which function returns indices of `list a` that the element is greater than 3
+
+```{r}
+which(a > 3)
+```
+
+Let's define two character vectors.
+
+```{r}
+d <- LETTERS[1:10]
+d
+e <- LETTERS[7:10]
+e
+```
+
+This shows whether an element of `vector d` any matches an element of `vector e`
+```{r}
+d %in% e
+```
+
+And here are the locations of TRUE values of vector d (matches vector e)
+```{r}
+which(d %in% e)   
+```
+
+```{r}
+array1 = 1:12
+
+which( array1 %% 2 == 0, arr.ind = F)   ## location in the array (1:12)
+```
+
+### Where is the min, max, first true/false?
+
+which.min()
+which.max()
+
+```{r}
+# Here is the list
+a = c(2, 4, 1, 7, 9, 1, 3, 5, 9, NA, "4")
+
+## print the location of the min element 
+which.min(a)
+
+## print the min element itself
+a[which.min(a)]
+```
+
+
+```{r}
+## print the location of the min element 
+which.max(a)
+
+## print the min element itself
+a[which.max(a)]
+```
+
+If the input is a logical vector, `max` will indicate first `TRUE`, and `min` will indicate first `FALSE`.
+
+```{r}
+which.max(a > 3) ## the second element
+
+## print the second element
+a[which.max(a > 3)]
+```
+
+
+### `match(a, b)` function
+
+`match`: An integer vector giving the position in table of the first match if there is a match, otherwise nomatch.
+
+
+```{r}
+a = 1:15
+b = seq(1, 20, by=3)
+
+match(a, b)  ## returns location of true values of vector a
+```
+```{r}
+a %in% b
+```
+
+## Create a Data Frame
+
+There are multiple options and tools here.
+
+- data frame   
+- tibble    
+- data table   
+
+
+```{r}
+df <- cars
+head(df)
+```
+```{r}
+# test if value 5 in speed column
+5 %in% df$speed
+```
+```{r}
+# create a dataframe
+df2 <- data.frame(Type = c("fruit", "fruit","fruit", "veggie","veggie"),
+                  Name = c("red apple", "green apple", "red apple", "green apple" ,"red apple"), Color = c(NA, "red", "blue", "yellow", "red"))
+
+df2
+```
+
+```{r}
+df2 <- within(df2, 
+              { newcol = "No"
+              newcol[Type %in% c("fruit")] = "No"
+              newcol[Name %in% c( "green apple")] = "Yes"
+})
+
+head(df2, 3)
+```
+
+`subsetting`
+
+```{r}
+library(dplyr)
+
+df3 <- c("home", "veggie", "fruit")
+
+df2 %>%
+    filter(df2$Type %in% df3)
+```
+
+`dropping columns`
+```{r}
+df2[, !(colnames(df2) %in% c("Name", "Color")) ]
+```
+
+`selecting columns`
+
+```{r}
+df2[, (colnames(df2) %in% c("Name", "Color")) ]
+```
+
+`creating custom operator`
+
+```{r}
+`%notin%` <- Negate(`%in%`)
+
+numbs <- rep(seq(3), 4)
+numbs
+```
+```{r}
+4 %notin% numbs
+```
+
+
+
+
+
+
+
+
+
+<!--chapter:end:0.General/02-Math_Op.Rmd-->
+
+
+# Logic statements
+
+TRUE vs FALSE
+```{r}
+TRUE == TRUE
+```
+```{r}
+(FALSE == TRUE) == FALSE
+```
+```{r}
+6==7
+```
+```{r}
+6<=6
+```
+```{r}
+4 != 5
+```
+```{r}
+!(5 == 71)
+```
+
+```{r}
+TRUE & TRUE
+```
+```{r}
+FALSE & FALSE
+```
+
+```{r}
+TRUE & c(TRUE, FALSE, FALSE)
+```
+equivalent statement as 
+```{r}
+c(TRUE, TRUE, TRUE) & c(TRUE, FALSE, FALSE)
+
+```
+# be careful
+```{r}
+TRUE && c(TRUE, FALSE, FALSE)
+```
+In this case, the left operand is only evaluated with the first member
+of the right operand (the vector). The rest of the elements in the
+vector aren't evaluated at all in this expression.
+
+```{r}
+TRUE | FALSE
+```
+
+```{r}
+TRUE | c(TRUE, FALSE, FALSE)
+```
+
+```{r}
+TRUE || c(TRUE, FALSE, FALSE)
+```
+
+```{r}
+FALSE && 6 >= 6 || 7 >= 8 || 50 <= 49.5
+```
+```{r}
+!(8 > 4) ||  5 == 5.0 && 7.8 >= 7.79
+```
+```{r}
+TRUE && FALSE || 9 >= 4 && 3 < 6
+```
+
+```{r}
+99.99 > 100 || 45 < 7.3 || 4 != 4.0
+```
+
+```{r}
+isTRUE(6>4)
+```
+
+```{r}
+identical('twins', 'twins')
+```
+The xor() function stands for exclusive OR. If one argument evaluates to TRUE and one argument evaluates to FALSE, then this function will return TRUE, otherwise it will return FALSE.
+```{r}
+xor(5 == 6, !FALSE)
+```
+```{r}
+xor(T, T)
+```
+```{r}
+xor(F, F)
+```
+```{r}
+xor(identical(xor, 'xor'), 7 == 7.0)
+```
+```{r}
+xor(4 >= 9, 8 != 8.0)
+```
+
+```{r}
+ints <- sample(10)
+```
+
+```{r}
+ints > 5
+```
+
+The which() function takes a logical vector as an argument and returns the indices of the vector that are TRUE.
+```{r}
+which(c(TRUE, FALSE, TRUE))
+```
+
+```{r}
+x <- ints>7
+
+which(x)
+```
+The any() function will return TRUE if one or more of the elements in the logical vector is TRUE.
+
+```{r}
+any(ints<0)
+```
+
+The all() function will return TRUE if every element in the logical vector is TRUE.
+```{r}
+all(ints>0)
+```
+
+```{r}
+any(ints == 10)
+```
+
+```{r}
+all(c(TRUE, FALSE, TRUE))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--chapter:end:0.General/03-Logicals.Rmd-->
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+## matrices and data frames
+
+# Vectors contain one class of data
+
+```{r}
+num1 <- 1:20
+num1
+```
+```{r}
+dim(num1)
+```
+```{r}
+length(num1)
+```
+# Convert vector to a Matrix
+```{r}
+dim(num1) <- c(4, 5)
+```
+
+```{r}
+attributes(num1)
+```
+```{r}
+num1
+```
+
+```{r}
+class(num1)
+```
+```{r}
+my_matrix <- num1
+```
+
+# Creating a Matrix
+```{r}
+my_matrix2 <- matrix(data=1:20, nrow=4, ncol=5)
+```
+
+```{r}
+identical(my_matrix, my_matrix2)
+```
+# Create a character vector
+```{r}
+patients <- c("Bill", "Gina", "Kelly", "Sean")
+```
+
+# column bind
+```{r}
+alt <- cbind(patients, my_matrix)
+alt
+```
+
+# R recycles if columns are not equal
+```{r}
+num2 <- 1:10
+alt2 <- cbind(patients, num2)
+alt2
+```
+```{r}
+df <- data.frame(patients, my_matrix)
+
+df
+```
+```{r}
+class(df)
+```
+# Create and ; variable names
+```{r}
+cnames <- c("patient", "age", "weight", "bp", "rating", "test")
+```
+# assign column names
+```{r}
+colnames(df) <- cnames
+```
+
+```{r}
+names(df)
+```
+
+```{r}
+names(df) <- toupper(names(df))
+
+names(df)
+```
+```{r}
+names(df) <- tolower(names(df))
+
+names(df)
+```
+
+# reorder the variable names
+```{r}
+df <- df[ , c(6:1)]
+names(df)
+colnames(df)
+```
+# Reordering columns
+```{r}
+df <- df[ , c( "age", "test", "weight", "bp", "patient", "rating")]
+names(df)
+```
+
+# Adding a new column
+```{r}
+df$newcol <- as.Date("2020-05-20")
+
+df$newcol[1]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--chapter:end:0.General/Matrice_swirl.Rmd-->
+
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+version
+```
+
+```{r}
+sessionInfo()
+```
+
+
+
+# operators
+
++, -, \ 
+
+exponentiation: ^ (**)
+modulo operator: %%  returns the remainder of a division
+
+# Categorical variables
+
+ nominal variables: represent data that are unordered
+```{r}
+colors <- c("green", "blue", "yellow")
+factor(colors)
+```
+
+Ordinal variables: ordered, ranked data
+
+If you dont specify, R will do alphatecially
+```{r}
+speed <- c("low", "high", "med", "med")
+
+factor(speed, ordered = TRUE)
+```
+
+If you specify:
+
+```{r}
+speed <- c("low", "high", "med", "med")
+
+factor(speed,
+       levels = c("low", "med", "high"),
+       ordered = TRUE)
+```
+
+Grab a component from a list
+
+```{r}
+mylist = list(A = c("a, b, d"),
+              cinema = ("stars"),
+              size = c(1, 2, 3, 4, 4))
+```
+
+Three ways to select a column
+
+```{r}
+mylist[[2]]
+
+mylist[["cinema"]]
+
+mylist$cinema
+```
+
+
+
+
+# Logical Values
+An example
+```{r setup, results='hide'}
+x=1 ; y=3 ; z= x > y
+print(z)
+```
+```{r}
+class(z)
+```
+
+Standard Logical operations
+```{r}
+u=TRUE; v=FALSE
+u & v     # u and v
+```
+```{r}
+u | v     # u or v
+```
+```{r}
+!u      # negation
+```
+# Integer Value
+Using integer function (making integer)
+```{r}
+y = as.integer(42.5)  #forcing
+print(y)
+```
+```{r}
+class(y)
+```
+
+
+
+# Character Values
+A chracter object is a string value
+```{r}
+x= as.character(842)
+y= as.character("Davut")
+print(x)
+print(y)
+class(x)    # print class of x 
+class(y)
+```
+Concatenate two characters
+```{r}
+firstname="Davut"; lastname="Ayan"
+paste(firstname, lastname)   # concatenate
+```
+Create a readable string
+```{r}
+sprintf("%s has %d dollars", "Davut", 5000)
+```
+Extract a substring 
+```{r}
+substr("Davut is a crazy person", start=2, stop = 5)
+```
+
+vectors
+
+# Basics
+
+creating a vector (numeric, string, logical)
+
+```{r}
+x=c(1,4,TRUE, "deneme")
+print(x)
+length(x)   #number of members
+```
+
