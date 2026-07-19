@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>R for Data Science</title>
+  <title>Chapter 5 Data Manipulation | R for Data Science</title>
   <meta name="description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="R for Data Science" />
+  <meta property="og:title" content="Chapter 5 Data Manipulation | R for Data Science" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="R for Data Science" />
+  <meta name="twitter:title" content="Chapter 5 Data Manipulation | R for Data Science" />
   
   <meta name="twitter:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="r-foundations.html"/>
+<link rel="prev" href="iteration-and-grouped-operations.html"/>
+<link rel="next" href="missing-and-non-finite-values.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -248,27 +248,152 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">R for Data Science</h1>
-<p class="author"><em>Davut Ayan</em></p>
+<div id="data-manipulation" class="section level1 hasAnchor" number="5">
+<h1><span class="header-section-number">Chapter 5</span> Data Manipulation<a href="data-manipulation.html#data-manipulation" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Data manipulation should make row selection, variable creation, aggregation,
+and table relationships visible. Start by checking keys, types, and row counts;
+then verify that each transformation preserves the intended unit of analysis.</p>
+<div id="example-tables" class="section level2 hasAnchor" number="5.1">
+<h2><span class="header-section-number">5.1</span> Example tables<a href="data-manipulation.html#example-tables" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="data-manipulation.html#cb38-1" tabindex="-1"></a>customers_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb38-2"><a href="data-manipulation.html#cb38-2" tabindex="-1"></a>  <span class="at">customer_id =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,</span>
+<span id="cb38-3"><a href="data-manipulation.html#cb38-3" tabindex="-1"></a>  <span class="at">segment =</span> <span class="fu">c</span>(<span class="st">&quot;new&quot;</span>, <span class="st">&quot;returning&quot;</span>, <span class="st">&quot;new&quot;</span>, <span class="st">&quot;returning&quot;</span>)</span>
+<span id="cb38-4"><a href="data-manipulation.html#cb38-4" tabindex="-1"></a>)</span>
+<span id="cb38-5"><a href="data-manipulation.html#cb38-5" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="data-manipulation.html#cb38-6" tabindex="-1"></a>orders_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb38-7"><a href="data-manipulation.html#cb38-7" tabindex="-1"></a>  <span class="at">order_id =</span> <span class="dv">101</span><span class="sc">:</span><span class="dv">106</span>,</span>
+<span id="cb38-8"><a href="data-manipulation.html#cb38-8" tabindex="-1"></a>  <span class="at">customer_id =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">4</span>),</span>
+<span id="cb38-9"><a href="data-manipulation.html#cb38-9" tabindex="-1"></a>  <span class="at">revenue =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">45</span>, <span class="dv">55</span>, <span class="dv">25</span>, <span class="dv">60</span>, <span class="dv">40</span>)</span>
+<span id="cb38-10"><a href="data-manipulation.html#cb38-10" tabindex="-1"></a>)</span>
+<span id="cb38-11"><a href="data-manipulation.html#cb38-11" tabindex="-1"></a></span>
+<span id="cb38-12"><a href="data-manipulation.html#cb38-12" tabindex="-1"></a>customers_table</span>
+<span id="cb38-13"><a href="data-manipulation.html#cb38-13" tabindex="-1"></a><span class="co">#&gt;   customer_id   segment</span></span>
+<span id="cb38-14"><a href="data-manipulation.html#cb38-14" tabindex="-1"></a><span class="co">#&gt; 1           1       new</span></span>
+<span id="cb38-15"><a href="data-manipulation.html#cb38-15" tabindex="-1"></a><span class="co">#&gt; 2           2 returning</span></span>
+<span id="cb38-16"><a href="data-manipulation.html#cb38-16" tabindex="-1"></a><span class="co">#&gt; 3           3       new</span></span>
+<span id="cb38-17"><a href="data-manipulation.html#cb38-17" tabindex="-1"></a><span class="co">#&gt; 4           4 returning</span></span>
+<span id="cb38-18"><a href="data-manipulation.html#cb38-18" tabindex="-1"></a>orders_table</span>
+<span id="cb38-19"><a href="data-manipulation.html#cb38-19" tabindex="-1"></a><span class="co">#&gt;   order_id customer_id revenue</span></span>
+<span id="cb38-20"><a href="data-manipulation.html#cb38-20" tabindex="-1"></a><span class="co">#&gt; 1      101           1      30</span></span>
+<span id="cb38-21"><a href="data-manipulation.html#cb38-21" tabindex="-1"></a><span class="co">#&gt; 2      102           2      45</span></span>
+<span id="cb38-22"><a href="data-manipulation.html#cb38-22" tabindex="-1"></a><span class="co">#&gt; 3      103           2      55</span></span>
+<span id="cb38-23"><a href="data-manipulation.html#cb38-23" tabindex="-1"></a><span class="co">#&gt; 4      104           3      25</span></span>
+<span id="cb38-24"><a href="data-manipulation.html#cb38-24" tabindex="-1"></a><span class="co">#&gt; 5      105           4      60</span></span>
+<span id="cb38-25"><a href="data-manipulation.html#cb38-25" tabindex="-1"></a><span class="co">#&gt; 6      106           4      40</span></span></code></pre></div>
+<p><code>customer_id</code> is unique in the customer table but repeated in the order table.
+That makes a join from orders to customers many-to-one.</p>
 </div>
-<div id="welcome" class="section level1 unnumbered hasAnchor">
-<h1>Welcome<a href="index.html#welcome" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>This book is a practical guide to R for data-science work. It is designed for
-structured study, quick reference, and technical interview preparation.</p>
-<p>The initial chapters focus on core language concepts and data structures. The
-book will grow through small, reviewed additions covering functions, iteration,
-data manipulation, visualization, reproducibility, and modeling workflow.</p>
-<div id="how-to-use-this-book" class="section level2 unnumbered hasAnchor">
-<h2>How to use this book<a href="index.html#how-to-use-this-book" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="base-r-selection-and-transformation" class="section level2 hasAnchor" number="5.2">
+<h2><span class="header-section-number">5.2</span> Base R selection and transformation<a href="data-manipulation.html#base-r-selection-and-transformation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Rows can be filtered with a logical vector and columns selected by name.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb39-1"><a href="data-manipulation.html#cb39-1" tabindex="-1"></a>orders_table[</span>
+<span id="cb39-2"><a href="data-manipulation.html#cb39-2" tabindex="-1"></a>  orders_table<span class="sc">$</span>revenue <span class="sc">&gt;=</span> <span class="dv">40</span>,</span>
+<span id="cb39-3"><a href="data-manipulation.html#cb39-3" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">&quot;order_id&quot;</span>, <span class="st">&quot;customer_id&quot;</span>, <span class="st">&quot;revenue&quot;</span>)</span>
+<span id="cb39-4"><a href="data-manipulation.html#cb39-4" tabindex="-1"></a>]</span>
+<span id="cb39-5"><a href="data-manipulation.html#cb39-5" tabindex="-1"></a><span class="co">#&gt;   order_id customer_id revenue</span></span>
+<span id="cb39-6"><a href="data-manipulation.html#cb39-6" tabindex="-1"></a><span class="co">#&gt; 2      102           2      45</span></span>
+<span id="cb39-7"><a href="data-manipulation.html#cb39-7" tabindex="-1"></a><span class="co">#&gt; 3      103           2      55</span></span>
+<span id="cb39-8"><a href="data-manipulation.html#cb39-8" tabindex="-1"></a><span class="co">#&gt; 5      105           4      60</span></span>
+<span id="cb39-9"><a href="data-manipulation.html#cb39-9" tabindex="-1"></a><span class="co">#&gt; 6      106           4      40</span></span></code></pre></div>
+<p>Assign a derived column directly when the formula is simple and vectorized.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb40-1"><a href="data-manipulation.html#cb40-1" tabindex="-1"></a>orders_table<span class="sc">$</span>revenue_after_fee <span class="ot">&lt;-</span> orders_table<span class="sc">$</span>revenue <span class="sc">*</span> <span class="fl">0.97</span></span>
+<span id="cb40-2"><a href="data-manipulation.html#cb40-2" tabindex="-1"></a><span class="fu">head</span>(orders_table, <span class="dv">3</span>)</span>
+<span id="cb40-3"><a href="data-manipulation.html#cb40-3" tabindex="-1"></a><span class="co">#&gt;   order_id customer_id revenue revenue_after_fee</span></span>
+<span id="cb40-4"><a href="data-manipulation.html#cb40-4" tabindex="-1"></a><span class="co">#&gt; 1      101           1      30             29.10</span></span>
+<span id="cb40-5"><a href="data-manipulation.html#cb40-5" tabindex="-1"></a><span class="co">#&gt; 2      102           2      45             43.65</span></span>
+<span id="cb40-6"><a href="data-manipulation.html#cb40-6" tabindex="-1"></a><span class="co">#&gt; 3      103           2      55             53.35</span></span></code></pre></div>
+</div>
+<div id="dplyr-pipelines" class="section level2 hasAnchor" number="5.3">
+<h2><span class="header-section-number">5.3</span> <code>dplyr</code> pipelines<a href="data-manipulation.html#dplyr-pipelines" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The <code>dplyr</code> verbs make a sequence of table operations explicit. Use namespace
+qualification in reusable examples so readers can see where a function comes
+from.</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb41-1"><a href="data-manipulation.html#cb41-1" tabindex="-1"></a>high_value_orders <span class="ot">&lt;-</span> orders_table <span class="sc">|&gt;</span></span>
+<span id="cb41-2"><a href="data-manipulation.html#cb41-2" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(revenue <span class="sc">&gt;=</span> <span class="dv">40</span>) <span class="sc">|&gt;</span></span>
+<span id="cb41-3"><a href="data-manipulation.html#cb41-3" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">mutate</span>(</span>
+<span id="cb41-4"><a href="data-manipulation.html#cb41-4" tabindex="-1"></a>    <span class="at">revenue_band =</span> dplyr<span class="sc">::</span><span class="fu">if_else</span>(revenue <span class="sc">&gt;=</span> <span class="dv">55</span>, <span class="st">&quot;high&quot;</span>, <span class="st">&quot;medium&quot;</span>)</span>
+<span id="cb41-5"><a href="data-manipulation.html#cb41-5" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb41-6"><a href="data-manipulation.html#cb41-6" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(order_id, customer_id, revenue, revenue_band) <span class="sc">|&gt;</span></span>
+<span id="cb41-7"><a href="data-manipulation.html#cb41-7" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">arrange</span>(dplyr<span class="sc">::</span><span class="fu">desc</span>(revenue))</span>
+<span id="cb41-8"><a href="data-manipulation.html#cb41-8" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="data-manipulation.html#cb41-9" tabindex="-1"></a>high_value_orders</span>
+<span id="cb41-10"><a href="data-manipulation.html#cb41-10" tabindex="-1"></a><span class="co">#&gt;   order_id customer_id revenue revenue_band</span></span>
+<span id="cb41-11"><a href="data-manipulation.html#cb41-11" tabindex="-1"></a><span class="co">#&gt; 1      105           4      60         high</span></span>
+<span id="cb41-12"><a href="data-manipulation.html#cb41-12" tabindex="-1"></a><span class="co">#&gt; 2      103           2      55         high</span></span>
+<span id="cb41-13"><a href="data-manipulation.html#cb41-13" tabindex="-1"></a><span class="co">#&gt; 3      102           2      45       medium</span></span>
+<span id="cb41-14"><a href="data-manipulation.html#cb41-14" tabindex="-1"></a><span class="co">#&gt; 4      106           4      40       medium</span></span></code></pre></div>
+<p>Inside a <code>dplyr</code> data mask, <code>if_else()</code> is type-stable and requires compatible
+true, false, and missing branches.</p>
+</div>
+<div id="grouped-summaries" class="section level2 hasAnchor" number="5.4">
+<h2><span class="header-section-number">5.4</span> Grouped summaries<a href="data-manipulation.html#grouped-summaries" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>After grouping, every summary should have a clear interpretation at the new
+unit of analysis.</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb42-1"><a href="data-manipulation.html#cb42-1" tabindex="-1"></a>customer_summary <span class="ot">&lt;-</span> orders_table <span class="sc">|&gt;</span></span>
+<span id="cb42-2"><a href="data-manipulation.html#cb42-2" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">group_by</span>(customer_id) <span class="sc">|&gt;</span></span>
+<span id="cb42-3"><a href="data-manipulation.html#cb42-3" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">summarise</span>(</span>
+<span id="cb42-4"><a href="data-manipulation.html#cb42-4" tabindex="-1"></a>    <span class="at">order_count =</span> dplyr<span class="sc">::</span><span class="fu">n</span>(),</span>
+<span id="cb42-5"><a href="data-manipulation.html#cb42-5" tabindex="-1"></a>    <span class="at">total_revenue =</span> <span class="fu">sum</span>(revenue),</span>
+<span id="cb42-6"><a href="data-manipulation.html#cb42-6" tabindex="-1"></a>    <span class="at">average_revenue =</span> <span class="fu">mean</span>(revenue),</span>
+<span id="cb42-7"><a href="data-manipulation.html#cb42-7" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb42-8"><a href="data-manipulation.html#cb42-8" tabindex="-1"></a>  )</span>
+<span id="cb42-9"><a href="data-manipulation.html#cb42-9" tabindex="-1"></a></span>
+<span id="cb42-10"><a href="data-manipulation.html#cb42-10" tabindex="-1"></a>customer_summary</span>
+<span id="cb42-11"><a href="data-manipulation.html#cb42-11" tabindex="-1"></a><span class="co">#&gt; # A tibble: 4 × 4</span></span>
+<span id="cb42-12"><a href="data-manipulation.html#cb42-12" tabindex="-1"></a><span class="co">#&gt;   customer_id order_count total_revenue average_revenue</span></span>
+<span id="cb42-13"><a href="data-manipulation.html#cb42-13" tabindex="-1"></a><span class="co">#&gt;         &lt;dbl&gt;       &lt;int&gt;         &lt;dbl&gt;           &lt;dbl&gt;</span></span>
+<span id="cb42-14"><a href="data-manipulation.html#cb42-14" tabindex="-1"></a><span class="co">#&gt; 1           1           1            30              30</span></span>
+<span id="cb42-15"><a href="data-manipulation.html#cb42-15" tabindex="-1"></a><span class="co">#&gt; 2           2           2           100              50</span></span>
+<span id="cb42-16"><a href="data-manipulation.html#cb42-16" tabindex="-1"></a><span class="co">#&gt; 3           3           1            25              25</span></span>
+<span id="cb42-17"><a href="data-manipulation.html#cb42-17" tabindex="-1"></a><span class="co">#&gt; 4           4           2           100              50</span></span></code></pre></div>
+<p>Always check whether missing values should propagate or be explicitly removed.</p>
+</div>
+<div id="joins-and-cardinality" class="section level2 hasAnchor" number="5.5">
+<h2><span class="header-section-number">5.5</span> Joins and cardinality<a href="data-manipulation.html#joins-and-cardinality" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>State the expected relationship before joining. A many-to-many join can
+multiply rows and totals even when the code runs without an error.</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb43-1"><a href="data-manipulation.html#cb43-1" tabindex="-1"></a>orders_enriched <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">left_join</span>(</span>
+<span id="cb43-2"><a href="data-manipulation.html#cb43-2" tabindex="-1"></a>  orders_table,</span>
+<span id="cb43-3"><a href="data-manipulation.html#cb43-3" tabindex="-1"></a>  customers_table,</span>
+<span id="cb43-4"><a href="data-manipulation.html#cb43-4" tabindex="-1"></a>  <span class="at">by =</span> <span class="st">&quot;customer_id&quot;</span>,</span>
+<span id="cb43-5"><a href="data-manipulation.html#cb43-5" tabindex="-1"></a>  <span class="at">relationship =</span> <span class="st">&quot;many-to-one&quot;</span></span>
+<span id="cb43-6"><a href="data-manipulation.html#cb43-6" tabindex="-1"></a>)</span>
+<span id="cb43-7"><a href="data-manipulation.html#cb43-7" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="data-manipulation.html#cb43-8" tabindex="-1"></a>orders_enriched</span>
+<span id="cb43-9"><a href="data-manipulation.html#cb43-9" tabindex="-1"></a><span class="co">#&gt;   order_id customer_id revenue revenue_after_fee   segment</span></span>
+<span id="cb43-10"><a href="data-manipulation.html#cb43-10" tabindex="-1"></a><span class="co">#&gt; 1      101           1      30             29.10       new</span></span>
+<span id="cb43-11"><a href="data-manipulation.html#cb43-11" tabindex="-1"></a><span class="co">#&gt; 2      102           2      45             43.65 returning</span></span>
+<span id="cb43-12"><a href="data-manipulation.html#cb43-12" tabindex="-1"></a><span class="co">#&gt; 3      103           2      55             53.35 returning</span></span>
+<span id="cb43-13"><a href="data-manipulation.html#cb43-13" tabindex="-1"></a><span class="co">#&gt; 4      104           3      25             24.25       new</span></span>
+<span id="cb43-14"><a href="data-manipulation.html#cb43-14" tabindex="-1"></a><span class="co">#&gt; 5      105           4      60             58.20 returning</span></span>
+<span id="cb43-15"><a href="data-manipulation.html#cb43-15" tabindex="-1"></a><span class="co">#&gt; 6      106           4      40             38.80 returning</span></span></code></pre></div>
+<p>Reconcile important quantities after the join.</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb44-1"><a href="data-manipulation.html#cb44-1" tabindex="-1"></a><span class="fu">stopifnot</span>(</span>
+<span id="cb44-2"><a href="data-manipulation.html#cb44-2" tabindex="-1"></a>  <span class="fu">nrow</span>(orders_enriched) <span class="sc">==</span> <span class="fu">nrow</span>(orders_table),</span>
+<span id="cb44-3"><a href="data-manipulation.html#cb44-3" tabindex="-1"></a>  <span class="fu">sum</span>(orders_enriched<span class="sc">$</span>revenue) <span class="sc">==</span> <span class="fu">sum</span>(orders_table<span class="sc">$</span>revenue),</span>
+<span id="cb44-4"><a href="data-manipulation.html#cb44-4" tabindex="-1"></a>  <span class="sc">!</span><span class="fu">anyNA</span>(orders_enriched<span class="sc">$</span>segment)</span>
+<span id="cb44-5"><a href="data-manipulation.html#cb44-5" tabindex="-1"></a>)</span></code></pre></div>
+</div>
+<div id="avoid-row-wise-work-when-possible" class="section level2 hasAnchor" number="5.6">
+<h2><span class="header-section-number">5.6</span> Avoid row-wise work when possible<a href="data-manipulation.html#avoid-row-wise-work-when-possible" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Vectorized expressions and grouped operations are usually clearer than
+processing one row at a time. Row-wise logic is appropriate only when the task
+truly operates on heterogeneous values within each record.</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb45-1"><a href="data-manipulation.html#cb45-1" tabindex="-1"></a>orders_enriched<span class="sc">$</span>revenue_share <span class="ot">&lt;-</span></span>
+<span id="cb45-2"><a href="data-manipulation.html#cb45-2" tabindex="-1"></a>  orders_enriched<span class="sc">$</span>revenue <span class="sc">/</span> <span class="fu">sum</span>(orders_enriched<span class="sc">$</span>revenue)</span>
+<span id="cb45-3"><a href="data-manipulation.html#cb45-3" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="data-manipulation.html#cb45-4" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">sum</span>(orders_enriched<span class="sc">$</span>revenue_share), <span class="dv">10</span>)</span>
+<span id="cb45-5"><a href="data-manipulation.html#cb45-5" tabindex="-1"></a><span class="co">#&gt; [1] 1</span></span></code></pre></div>
+</div>
+<div id="interview-checkpoints-4" class="section level2 hasAnchor" number="5.7">
+<h2><span class="header-section-number">5.7</span> Interview checkpoints<a href="data-manipulation.html#interview-checkpoints-4" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li>Run examples and change small inputs to test your understanding.</li>
-<li>Focus on object types, vectorization, indexing, and missing-value behavior.</li>
-<li>Explain each result in plain language rather than memorizing syntax.</li>
-<li>Review the failure modes and assumptions before using a pattern in real work.</li>
+<li>Define a table’s unit of analysis and candidate key.</li>
+<li>Explain one-to-one, one-to-many, and many-to-many joins.</li>
+<li>Describe how a join can inflate row counts and aggregate totals.</li>
+<li>Explain the purpose of <code>.groups = "drop"</code> after <code>summarise()</code>.</li>
+<li>Describe checks you would perform before and after a production join.</li>
 </ul>
-<p>Older assignments and practice exercises are retained as source material but
-are not automatically part of the published book.</p>
 
 </div>
 </div>
@@ -277,8 +402,8 @@ are not automatically part of the published book.</p>
           </div>
         </div>
       </div>
-
-<a href="r-foundations.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="iteration-and-grouped-operations.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="missing-and-non-finite-values.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

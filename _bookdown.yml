@@ -1,7 +1,18 @@
-#book_filename: "bookdown-demo"
 book_filename: "r_book_file"
+output_dir: "docs"
+delete_merged_file: true
+
+rmd_files:
+  - "index.Rmd"
+  - "__REPO/00_Basics/00_01_intro.Rmd"
+  - "__REPO/00_Basics/00_02_data.Rmd"
+  - "__REPO/00_Basics/00_03_control_functions.Rmd"
+  - "__REPO/00_Basics/00_04_iteration.Rmd"
+  - "__REPO/00_Basics/00_05_data_manipulation.Rmd"
+  - "__REPO/00_Basics/00_06_missing_values.Rmd"
+  - "__REPO/00_Basics/00_07_simulation.Rmd"
+  - "__REPO/00_Basics/00_08_debugging.Rmd"
+
 language:
   ui:
     chapter_name: "Chapter "
-delete_merged_file: true
-output_dir: "docs"

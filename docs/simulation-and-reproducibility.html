@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>R for Data Science</title>
+  <title>Chapter 7 Simulation and Reproducibility | R for Data Science</title>
   <meta name="description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="R for Data Science" />
+  <meta property="og:title" content="Chapter 7 Simulation and Reproducibility | R for Data Science" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="R for Data Science" />
+  <meta name="twitter:title" content="Chapter 7 Simulation and Reproducibility | R for Data Science" />
   
   <meta name="twitter:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="r-foundations.html"/>
+<link rel="prev" href="missing-and-non-finite-values.html"/>
+<link rel="next" href="debugging-and-testing.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -248,27 +248,131 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">R for Data Science</h1>
-<p class="author"><em>Davut Ayan</em></p>
-</div>
-<div id="welcome" class="section level1 unnumbered hasAnchor">
-<h1>Welcome<a href="index.html#welcome" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>This book is a practical guide to R for data-science work. It is designed for
-structured study, quick reference, and technical interview preparation.</p>
-<p>The initial chapters focus on core language concepts and data structures. The
-book will grow through small, reviewed additions covering functions, iteration,
-data manipulation, visualization, reproducibility, and modeling workflow.</p>
-<div id="how-to-use-this-book" class="section level2 unnumbered hasAnchor">
-<h2>How to use this book<a href="index.html#how-to-use-this-book" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="simulation-and-reproducibility" class="section level1 hasAnchor" number="7">
+<h1><span class="header-section-number">Chapter 7</span> Simulation and Reproducibility<a href="simulation-and-reproducibility.html#simulation-and-reproducibility" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Simulation helps test intuition, evaluate estimators, and understand sampling
+variation. A reproducible simulation specifies the random seed, data-generating
+process, number of repetitions, and quantity being estimated.</p>
+<div id="distribution-functions" class="section level2 hasAnchor" number="7.1">
+<h2><span class="header-section-number">7.1</span> Distribution functions<a href="simulation-and-reproducibility.html#distribution-functions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>R uses consistent prefixes for probability distributions:</p>
 <ul>
-<li>Run examples and change small inputs to test your understanding.</li>
-<li>Focus on object types, vectorization, indexing, and missing-value behavior.</li>
-<li>Explain each result in plain language rather than memorizing syntax.</li>
-<li>Review the failure modes and assumptions before using a pattern in real work.</li>
+<li><code>d*</code> returns a density or probability mass.</li>
+<li><code>p*</code> returns a cumulative probability.</li>
+<li><code>q*</code> returns a quantile.</li>
+<li><code>r*</code> generates random values.</li>
 </ul>
-<p>Older assignments and practice exercises are retained as source material but
-are not automatically part of the published book.</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb53-1"><a href="simulation-and-reproducibility.html#cb53-1" tabindex="-1"></a><span class="fu">dnorm</span>(<span class="dv">0</span>)</span>
+<span id="cb53-2"><a href="simulation-and-reproducibility.html#cb53-2" tabindex="-1"></a><span class="co">#&gt; [1] 0.3989423</span></span>
+<span id="cb53-3"><a href="simulation-and-reproducibility.html#cb53-3" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="fl">1.96</span>)</span>
+<span id="cb53-4"><a href="simulation-and-reproducibility.html#cb53-4" tabindex="-1"></a><span class="co">#&gt; [1] 0.9750021</span></span>
+<span id="cb53-5"><a href="simulation-and-reproducibility.html#cb53-5" tabindex="-1"></a><span class="fu">qnorm</span>(<span class="fl">0.975</span>)</span>
+<span id="cb53-6"><a href="simulation-and-reproducibility.html#cb53-6" tabindex="-1"></a><span class="co">#&gt; [1] 1.959964</span></span></code></pre></div>
+<p>For a continuous distribution, <code>dnorm(0)</code> is a density height, not the
+probability that a continuous random variable equals exactly zero.</p>
+</div>
+<div id="reproducible-random-generation" class="section level2 hasAnchor" number="7.2">
+<h2><span class="header-section-number">7.2</span> Reproducible random generation<a href="simulation-and-reproducibility.html#reproducible-random-generation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>set.seed()</code> resets R’s random-number stream so the same code produces the same
+sequence.</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb54-1"><a href="simulation-and-reproducibility.html#cb54-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb54-2"><a href="simulation-and-reproducibility.html#cb54-2" tabindex="-1"></a>first_draw <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">5</span>)</span>
+<span id="cb54-3"><a href="simulation-and-reproducibility.html#cb54-3" tabindex="-1"></a></span>
+<span id="cb54-4"><a href="simulation-and-reproducibility.html#cb54-4" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb54-5"><a href="simulation-and-reproducibility.html#cb54-5" tabindex="-1"></a>second_draw <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">5</span>)</span>
+<span id="cb54-6"><a href="simulation-and-reproducibility.html#cb54-6" tabindex="-1"></a></span>
+<span id="cb54-7"><a href="simulation-and-reproducibility.html#cb54-7" tabindex="-1"></a><span class="fu">identical</span>(first_draw, second_draw)</span>
+<span id="cb54-8"><a href="simulation-and-reproducibility.html#cb54-8" tabindex="-1"></a><span class="co">#&gt; [1] TRUE</span></span></code></pre></div>
+<p>Set a seed at the simulation boundary. Repeatedly resetting it inside a helper
+function can accidentally generate identical samples across calls.</p>
+</div>
+<div id="sampling" class="section level2 hasAnchor" number="7.3">
+<h2><span class="header-section-number">7.3</span> Sampling<a href="simulation-and-reproducibility.html#sampling" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Sampling without replacement selects distinct values. Sampling with
+replacement permits a value to appear multiple times and underlies the
+nonparametric bootstrap.</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb55-1"><a href="simulation-and-reproducibility.html#cb55-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb55-2"><a href="simulation-and-reproducibility.html#cb55-2" tabindex="-1"></a><span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">size =</span> <span class="dv">4</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb55-3"><a href="simulation-and-reproducibility.html#cb55-3" tabindex="-1"></a><span class="co">#&gt; [1] 9 1 6 5</span></span>
+<span id="cb55-4"><a href="simulation-and-reproducibility.html#cb55-4" tabindex="-1"></a><span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">size =</span> <span class="dv">8</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb55-5"><a href="simulation-and-reproducibility.html#cb55-5" tabindex="-1"></a><span class="co">#&gt; [1] 3 4 4 5 4 2 2 3</span></span></code></pre></div>
+</div>
+<div id="simulating-a-linear-model" class="section level2 hasAnchor" number="7.4">
+<h2><span class="header-section-number">7.4</span> Simulating a linear model<a href="simulation-and-reproducibility.html#simulating-a-linear-model" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Make the data-generating process explicit before fitting the model.</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb56-1"><a href="simulation-and-reproducibility.html#cb56-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb56-2"><a href="simulation-and-reproducibility.html#cb56-2" tabindex="-1"></a>simulation_size <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb56-3"><a href="simulation-and-reproducibility.html#cb56-3" tabindex="-1"></a>predictor <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(simulation_size)</span>
+<span id="cb56-4"><a href="simulation-and-reproducibility.html#cb56-4" tabindex="-1"></a>noise <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(simulation_size, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">2</span>)</span>
+<span id="cb56-5"><a href="simulation-and-reproducibility.html#cb56-5" tabindex="-1"></a>outcome <span class="ot">&lt;-</span> <span class="fl">0.5</span> <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> predictor <span class="sc">+</span> noise</span>
+<span id="cb56-6"><a href="simulation-and-reproducibility.html#cb56-6" tabindex="-1"></a></span>
+<span id="cb56-7"><a href="simulation-and-reproducibility.html#cb56-7" tabindex="-1"></a>simulated_fit <span class="ot">&lt;-</span> <span class="fu">lm</span>(outcome <span class="sc">~</span> predictor)</span>
+<span id="cb56-8"><a href="simulation-and-reproducibility.html#cb56-8" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">coef</span>(simulated_fit), <span class="dv">2</span>)</span>
+<span id="cb56-9"><a href="simulation-and-reproducibility.html#cb56-9" tabindex="-1"></a><span class="co">#&gt; (Intercept)   predictor </span></span>
+<span id="cb56-10"><a href="simulation-and-reproducibility.html#cb56-10" tabindex="-1"></a><span class="co">#&gt;        0.48        1.96</span></span></code></pre></div>
+<p>The fitted coefficients will not equal the generating parameters exactly
+because each sample contains random variation.</p>
+</div>
+<div id="monte-carlo-estimation" class="section level2 hasAnchor" number="7.5">
+<h2><span class="header-section-number">7.5</span> Monte Carlo estimation<a href="simulation-and-reproducibility.html#monte-carlo-estimation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>A Monte Carlo estimate is an average over repeated random experiments. Its
+simulation error generally decreases as the number of repetitions increases.</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb57-1"><a href="simulation-and-reproducibility.html#cb57-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb57-2"><a href="simulation-and-reproducibility.html#cb57-2" tabindex="-1"></a>repetitions <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb57-3"><a href="simulation-and-reproducibility.html#cb57-3" tabindex="-1"></a>dice_totals <span class="ot">&lt;-</span> <span class="fu">replicate</span>(</span>
+<span id="cb57-4"><a href="simulation-and-reproducibility.html#cb57-4" tabindex="-1"></a>  repetitions,</span>
+<span id="cb57-5"><a href="simulation-and-reproducibility.html#cb57-5" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">size =</span> <span class="dv">2</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb57-6"><a href="simulation-and-reproducibility.html#cb57-6" tabindex="-1"></a>)</span>
+<span id="cb57-7"><a href="simulation-and-reproducibility.html#cb57-7" tabindex="-1"></a></span>
+<span id="cb57-8"><a href="simulation-and-reproducibility.html#cb57-8" tabindex="-1"></a><span class="fu">mean</span>(dice_totals <span class="sc">&gt;=</span> <span class="dv">10</span>)</span>
+<span id="cb57-9"><a href="simulation-and-reproducibility.html#cb57-9" tabindex="-1"></a><span class="co">#&gt; [1] 0.1617</span></span></code></pre></div>
+<p>Report the seed and repetition count so another analyst can reproduce the
+result and assess simulation precision.</p>
+</div>
+<div id="bootstrap-uncertainty" class="section level2 hasAnchor" number="7.6">
+<h2><span class="header-section-number">7.6</span> Bootstrap uncertainty<a href="simulation-and-reproducibility.html#bootstrap-uncertainty" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>The nonparametric bootstrap repeatedly samples observed values with replacement
+and recomputes a statistic.</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb58-1"><a href="simulation-and-reproducibility.html#cb58-1" tabindex="-1"></a>observed_revenue <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">35</span>, <span class="dv">50</span>, <span class="dv">70</span>)</span>
+<span id="cb58-2"><a href="simulation-and-reproducibility.html#cb58-2" tabindex="-1"></a></span>
+<span id="cb58-3"><a href="simulation-and-reproducibility.html#cb58-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb58-4"><a href="simulation-and-reproducibility.html#cb58-4" tabindex="-1"></a>bootstrap_means <span class="ot">&lt;-</span> <span class="fu">replicate</span>(</span>
+<span id="cb58-5"><a href="simulation-and-reproducibility.html#cb58-5" tabindex="-1"></a>  <span class="dv">2000</span>,</span>
+<span id="cb58-6"><a href="simulation-and-reproducibility.html#cb58-6" tabindex="-1"></a>  <span class="fu">mean</span>(<span class="fu">sample</span>(observed_revenue, <span class="at">replace =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb58-7"><a href="simulation-and-reproducibility.html#cb58-7" tabindex="-1"></a>)</span>
+<span id="cb58-8"><a href="simulation-and-reproducibility.html#cb58-8" tabindex="-1"></a></span>
+<span id="cb58-9"><a href="simulation-and-reproducibility.html#cb58-9" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">quantile</span>(bootstrap_means, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>)), <span class="dv">2</span>)</span>
+<span id="cb58-10"><a href="simulation-and-reproducibility.html#cb58-10" tabindex="-1"></a><span class="co">#&gt;  2.5% 97.5% </span></span>
+<span id="cb58-11"><a href="simulation-and-reproducibility.html#cb58-11" tabindex="-1"></a><span class="co">#&gt; 25.83 52.50</span></span></code></pre></div>
+<p>This interval reflects the empirical sample and bootstrap assumptions. It is
+not a substitute for checking whether observations are independent and
+representative of the target population.</p>
+</div>
+<div id="timing-and-profiling" class="section level2 hasAnchor" number="7.7">
+<h2><span class="header-section-number">7.7</span> Timing and profiling<a href="simulation-and-reproducibility.html#timing-and-profiling" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Optimize only after identifying a real bottleneck. <code>system.time()</code> measures an
+expression, while <code>Rprof()</code> and dedicated profilers show where a program spends
+time.</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb59-1"><a href="simulation-and-reproducibility.html#cb59-1" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb59-2"><a href="simulation-and-reproducibility.html#cb59-2" tabindex="-1"></a>  result <span class="ot">&lt;-</span> <span class="fu">expensive_function</span>(data)</span>
+<span id="cb59-3"><a href="simulation-and-reproducibility.html#cb59-3" tabindex="-1"></a>})</span>
+<span id="cb59-4"><a href="simulation-and-reproducibility.html#cb59-4" tabindex="-1"></a></span>
+<span id="cb59-5"><a href="simulation-and-reproducibility.html#cb59-5" tabindex="-1"></a><span class="fu">Rprof</span>(<span class="st">&quot;profile.out&quot;</span>)</span>
+<span id="cb59-6"><a href="simulation-and-reproducibility.html#cb59-6" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">expensive_function</span>(data)</span>
+<span id="cb59-7"><a href="simulation-and-reproducibility.html#cb59-7" tabindex="-1"></a><span class="fu">Rprof</span>(<span class="cn">NULL</span>)</span>
+<span id="cb59-8"><a href="simulation-and-reproducibility.html#cb59-8" tabindex="-1"></a><span class="fu">summaryRprof</span>(<span class="st">&quot;profile.out&quot;</span>)</span></code></pre></div>
+<p>Profiling examples are not executed here because they require a real workload
+and create output files.</p>
+</div>
+<div id="interview-checkpoints-6" class="section level2 hasAnchor" number="7.8">
+<h2><span class="header-section-number">7.8</span> Interview checkpoints<a href="simulation-and-reproducibility.html#interview-checkpoints-6" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li>Explain the <code>d</code>, <code>p</code>, <code>q</code>, and <code>r</code> distribution prefixes.</li>
+<li>Explain what <code>set.seed()</code> guarantees and what it does not.</li>
+<li>Distinguish sampling with and without replacement.</li>
+<li>Describe a data-generating process for a simple linear model.</li>
+<li>Explain what uncertainty a nonparametric bootstrap represents.</li>
+</ul>
 
 </div>
 </div>
@@ -277,8 +381,8 @@ are not automatically part of the published book.</p>
           </div>
         </div>
       </div>
-
-<a href="r-foundations.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="missing-and-non-finite-values.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="debugging-and-testing.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

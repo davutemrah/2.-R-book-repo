@@ -1,0 +1,144 @@
+# R Foundations
+
+R is a programming language designed for statistical computing and data
+analysis. Its most important practical idea is vectorization: many operations
+work on an entire vector rather than requiring an explicit loop.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  error = FALSE,
+  warning = TRUE,
+  message = FALSE,
+  collapse = TRUE,
+  comment = "#>"
+)
+set.seed(2026)
+```
+
+## Objects and assignment
+
+Use `<-` for assignment in book and analysis code. Names should describe the
+meaning of an object rather than its storage type.
+
+```{r objects-assignment}
+sample_size <- 100L
+conversion_rate <- 0.18
+campaign_name <- "Summer launch"
+is_complete <- FALSE
+
+sample_size
+```
+
+The `L` suffix creates an integer. A number such as `0.18` is stored as a
+double. Use `typeof()` for the underlying storage type and `class()` for the
+object-oriented class used by generic functions.
+
+```{r inspect-objects}
+typeof(sample_size)
+typeof(conversion_rate)
+class(campaign_name)
+class(is_complete)
+```
+
+## Atomic vectors
+
+An atomic vector contains values of one underlying type. Arithmetic and most
+base R functions operate element by element.
+
+```{r vectorization}
+revenue <- c(120, 150, 135, 180)
+revenue * 1.05
+mean(revenue)
+```
+
+When values of different types are combined, R coerces them to a common type.
+This can be useful, but accidental coercion is a common source of bugs.
+
+```{r coercion}
+mixed <- c(10, TRUE, "20")
+mixed
+typeof(mixed)
+```
+
+Here every value becomes character because character is the most flexible of
+the supplied types. Convert deliberately with functions such as
+`as.integer()`, `as.double()`, and `as.character()`.
+
+## Missing values
+
+`NA` represents a missing value. Most summary functions propagate missingness
+unless the analyst explicitly chooses to remove missing values.
+
+```{r missing-values}
+scores <- c(82, 91, NA, 88)
+
+mean(scores)
+mean(scores, na.rm = TRUE)
+is.na(scores)
+```
+
+Do not test missingness with `x == NA`; the result is unknown rather than
+`TRUE` or `FALSE`. Use `is.na(x)`.
+
+## Comparisons and logical operators
+
+Use `&` and `|` for element-wise comparisons. Use `&&` and `||` only when a
+single Boolean decision is intended, such as the condition in an `if`
+statement.
+
+```{r logical-operators}
+values <- 1:6
+values > 2 & values < 6
+values[values > 2 & values < 6]
+```
+
+`%in%` is useful for membership checks and never returns `NA` for ordinary
+missing-value comparisons.
+
+```{r membership}
+requested_ids <- c(2, 4, 8)
+values %in% requested_ids
+```
+
+## Functions and help
+
+Functions are objects. A function receives arguments, performs a focused task,
+and returns its final evaluated expression unless `return()` is used.
+
+```{r simple-function}
+center <- function(x, na.rm = FALSE) {
+  x - mean(x, na.rm = na.rm)
+}
+
+center(c(2, 4, 6))
+```
+
+Inspect a function's interface with `args()` and open its documentation with
+`help()` during an interactive session.
+
+```{r function-interface}
+args(mean)
+```
+
+## Paths and temporary files
+
+Prefer project-relative paths. Avoid embedding a personal absolute path or
+calling `setwd()` inside reusable analysis code.
+
+```{r temporary-file}
+temporary_path <- tempfile(fileext = ".txt")
+writeLines(c("first row", "second row"), temporary_path)
+readLines(temporary_path)
+unlink(temporary_path)
+```
+
+`tempfile()` makes the example portable and prevents it from leaving a file in
+the repository.
+
+## Interview checkpoints
+
+- Explain the difference between `class()` and `typeof()`.
+- Describe vector coercion and give an example of accidental coercion.
+- Explain why `is.na(x)` is required instead of `x == NA`.
+- Distinguish `&` from `&&` and `|` from `||`.
+- Explain why project-relative paths are safer than `setwd()`.

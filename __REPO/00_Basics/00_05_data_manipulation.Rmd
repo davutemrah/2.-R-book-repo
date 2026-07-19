@@ -1,0 +1,132 @@
+# Data Manipulation
+
+Data manipulation should make row selection, variable creation, aggregation,
+and table relationships visible. Start by checking keys, types, and row counts;
+then verify that each transformation preserves the intended unit of analysis.
+
+## Example tables
+
+```{r manipulation-data}
+customers_table <- data.frame(
+  customer_id = 1:4,
+  segment = c("new", "returning", "new", "returning")
+)
+
+orders_table <- data.frame(
+  order_id = 101:106,
+  customer_id = c(1, 2, 2, 3, 4, 4),
+  revenue = c(30, 45, 55, 25, 60, 40)
+)
+
+customers_table
+orders_table
+```
+
+`customer_id` is unique in the customer table but repeated in the order table.
+That makes a join from orders to customers many-to-one.
+
+## Base R selection and transformation
+
+Rows can be filtered with a logical vector and columns selected by name.
+
+```{r base-selection}
+orders_table[
+  orders_table$revenue >= 40,
+  c("order_id", "customer_id", "revenue")
+]
+```
+
+Assign a derived column directly when the formula is simple and vectorized.
+
+```{r base-transformation}
+orders_table$revenue_after_fee <- orders_table$revenue * 0.97
+head(orders_table, 3)
+```
+
+## `dplyr` pipelines
+
+The `dplyr` verbs make a sequence of table operations explicit. Use namespace
+qualification in reusable examples so readers can see where a function comes
+from.
+
+```{r dplyr-pipeline}
+high_value_orders <- orders_table |>
+  dplyr::filter(revenue >= 40) |>
+  dplyr::mutate(
+    revenue_band = dplyr::if_else(revenue >= 55, "high", "medium")
+  ) |>
+  dplyr::select(order_id, customer_id, revenue, revenue_band) |>
+  dplyr::arrange(dplyr::desc(revenue))
+
+high_value_orders
+```
+
+Inside a `dplyr` data mask, `if_else()` is type-stable and requires compatible
+true, false, and missing branches.
+
+## Grouped summaries
+
+After grouping, every summary should have a clear interpretation at the new
+unit of analysis.
+
+```{r grouped-summary}
+customer_summary <- orders_table |>
+  dplyr::group_by(customer_id) |>
+  dplyr::summarise(
+    order_count = dplyr::n(),
+    total_revenue = sum(revenue),
+    average_revenue = mean(revenue),
+    .groups = "drop"
+  )
+
+customer_summary
+```
+
+Always check whether missing values should propagate or be explicitly removed.
+
+## Joins and cardinality
+
+State the expected relationship before joining. A many-to-many join can
+multiply rows and totals even when the code runs without an error.
+
+```{r validated-join}
+orders_enriched <- dplyr::left_join(
+  orders_table,
+  customers_table,
+  by = "customer_id",
+  relationship = "many-to-one"
+)
+
+orders_enriched
+```
+
+Reconcile important quantities after the join.
+
+```{r join-reconciliation}
+stopifnot(
+  nrow(orders_enriched) == nrow(orders_table),
+  sum(orders_enriched$revenue) == sum(orders_table$revenue),
+  !anyNA(orders_enriched$segment)
+)
+```
+
+## Avoid row-wise work when possible
+
+Vectorized expressions and grouped operations are usually clearer than
+processing one row at a time. Row-wise logic is appropriate only when the task
+truly operates on heterogeneous values within each record.
+
+```{r vectorized-derived-column}
+orders_enriched$revenue_share <-
+  orders_enriched$revenue / sum(orders_enriched$revenue)
+
+round(sum(orders_enriched$revenue_share), 10)
+```
+
+## Interview checkpoints
+
+- Define a table's unit of analysis and candidate key.
+- Explain one-to-one, one-to-many, and many-to-many joins.
+- Describe how a join can inflate row counts and aggregate totals.
+- Explain the purpose of `.groups = "drop"` after `summarise()`.
+- Describe checks you would perform before and after a production join.

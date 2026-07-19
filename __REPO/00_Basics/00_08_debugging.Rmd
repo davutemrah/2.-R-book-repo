@@ -1,0 +1,137 @@
+# Debugging and Testing
+
+Debugging is the process of reducing a failure to a reproducible cause. Testing
+turns the expected behavior into checks that detect future regressions.
+
+## Conditions in R
+
+R communicates problems through conditions:
+
+- A **message** reports progress or context.
+- A **warning** signals a concern while allowing evaluation to continue.
+- An **error** stops the current evaluation.
+
+A function should fail early when continuing would produce a misleading
+result.
+
+```{r explicit-error}
+safe_log <- function(x) {
+  if (!is.numeric(x) || any(!is.finite(x)) || any(x <= 0)) {
+    stop("x must contain positive finite numbers.")
+  }
+  log(x)
+}
+
+safe_log(c(1, exp(1)))
+```
+
+## Capture expected failures
+
+`tryCatch()` handles a condition deliberately. Do not use it merely to hide an
+unexpected error.
+
+```{r try-catch}
+captured_message <- tryCatch(
+  safe_log(c(1, -1)),
+  error = function(condition) conditionMessage(condition)
+)
+
+captured_message
+```
+
+The handler converts this intentionally demonstrated error into a value, so the
+book can test the expected message without globally allowing failures.
+
+## A reproducible debugging workflow
+
+1. Record the exact error and call that triggered it.
+2. Reduce the input to the smallest example that still fails.
+3. Inspect structure with `str()`, `class()`, `typeof()`, `length()`, and
+   `names()`.
+4. Check assumptions at the boundary where the data enter the function.
+5. Fix the cause and add a test that would have caught it.
+
+```{r inspect-bug-input}
+unexpected_input <- data.frame(
+  amount = c("10", "20", "unknown")
+)
+
+str(unexpected_input)
+```
+
+The structure reveals that `amount` is character. Converting blindly would
+turn the unexpected label into a missing value, so validate allowed text first.
+
+```{r validate-conversion}
+parse_amount <- function(x) {
+  valid_number <- grepl("^[0-9]+([.][0-9]+)?$", x)
+  if (any(!valid_number)) {
+    stop("amount contains a non-numeric label.")
+  }
+  as.numeric(x)
+}
+
+parse_amount(c("10", "20.5"))
+```
+
+## Interactive tools
+
+Use these tools during an interactive debugging session:
+
+- `traceback()` displays the call stack after an error.
+- `browser()` pauses inside a function.
+- `debugonce(function_name)` opens the debugger on the next call.
+- `recover()` lets you inspect active call frames after an error.
+
+```{r interactive-debugging, eval=FALSE}
+options(error = recover)
+debugonce(model_function)
+model_function(data)
+options(error = NULL)
+```
+
+Do not leave global debugging options enabled in reproducible scripts.
+
+## Lightweight assertions
+
+`stopifnot()` is useful for internal invariants and compact checks.
+
+```{r assertions}
+normalize_weights <- function(weights) {
+  stopifnot(
+    is.numeric(weights),
+    length(weights) > 0L,
+    all(is.finite(weights)),
+    all(weights >= 0),
+    sum(weights) > 0
+  )
+
+  weights / sum(weights)
+}
+
+normalized_weights <- normalize_weights(c(1, 2, 1))
+stopifnot(abs(sum(normalized_weights) - 1) < 1e-12)
+normalized_weights
+```
+
+For a larger package or application, use a testing framework such as
+`testthat` so tests are organized, named, and run automatically.
+
+## Test boundaries and edge cases
+
+At minimum, test:
+
+- typical valid input;
+- empty or length-zero input;
+- missing and non-finite values;
+- invalid types and out-of-range values;
+- boundary values where conditions change;
+- properties that must always hold, such as normalized weights summing to one.
+
+## Interview checkpoints
+
+- Distinguish messages, warnings, and errors.
+- Explain when `tryCatch()` is appropriate.
+- Describe how you reduce a failure to a minimal reproducible example.
+- Compare input validation with internal assertions.
+- Name important edge cases for a data-processing function.

@@ -1,0 +1,139 @@
+# Simulation and Reproducibility
+
+Simulation helps test intuition, evaluate estimators, and understand sampling
+variation. A reproducible simulation specifies the random seed, data-generating
+process, number of repetitions, and quantity being estimated.
+
+## Distribution functions
+
+R uses consistent prefixes for probability distributions:
+
+- `d*` returns a density or probability mass.
+- `p*` returns a cumulative probability.
+- `q*` returns a quantile.
+- `r*` generates random values.
+
+```{r distribution-functions}
+dnorm(0)
+pnorm(1.96)
+qnorm(0.975)
+```
+
+For a continuous distribution, `dnorm(0)` is a density height, not the
+probability that a continuous random variable equals exactly zero.
+
+## Reproducible random generation
+
+`set.seed()` resets R's random-number stream so the same code produces the same
+sequence.
+
+```{r reproducible-randomness}
+set.seed(2026)
+first_draw <- rnorm(5)
+
+set.seed(2026)
+second_draw <- rnorm(5)
+
+identical(first_draw, second_draw)
+```
+
+Set a seed at the simulation boundary. Repeatedly resetting it inside a helper
+function can accidentally generate identical samples across calls.
+
+## Sampling
+
+Sampling without replacement selects distinct values. Sampling with
+replacement permits a value to appear multiple times and underlies the
+nonparametric bootstrap.
+
+```{r sampling}
+set.seed(2026)
+sample(1:10, size = 4, replace = FALSE)
+sample(1:6, size = 8, replace = TRUE)
+```
+
+## Simulating a linear model
+
+Make the data-generating process explicit before fitting the model.
+
+```{r linear-model-simulation}
+set.seed(2026)
+simulation_size <- 500
+predictor <- rnorm(simulation_size)
+noise <- rnorm(simulation_size, mean = 0, sd = 2)
+outcome <- 0.5 + 2 * predictor + noise
+
+simulated_fit <- lm(outcome ~ predictor)
+round(coef(simulated_fit), 2)
+```
+
+The fitted coefficients will not equal the generating parameters exactly
+because each sample contains random variation.
+
+## Monte Carlo estimation
+
+A Monte Carlo estimate is an average over repeated random experiments. Its
+simulation error generally decreases as the number of repetitions increases.
+
+```{r monte-carlo}
+set.seed(2026)
+repetitions <- 10000
+dice_totals <- replicate(
+  repetitions,
+  sum(sample(1:6, size = 2, replace = TRUE))
+)
+
+mean(dice_totals >= 10)
+```
+
+Report the seed and repetition count so another analyst can reproduce the
+result and assess simulation precision.
+
+## Bootstrap uncertainty
+
+The nonparametric bootstrap repeatedly samples observed values with replacement
+and recomputes a statistic.
+
+```{r bootstrap-example}
+observed_revenue <- c(20, 25, 30, 35, 50, 70)
+
+set.seed(2026)
+bootstrap_means <- replicate(
+  2000,
+  mean(sample(observed_revenue, replace = TRUE))
+)
+
+round(quantile(bootstrap_means, c(0.025, 0.975)), 2)
+```
+
+This interval reflects the empirical sample and bootstrap assumptions. It is
+not a substitute for checking whether observations are independent and
+representative of the target population.
+
+## Timing and profiling
+
+Optimize only after identifying a real bottleneck. `system.time()` measures an
+expression, while `Rprof()` and dedicated profilers show where a program spends
+time.
+
+```{r profiling-example, eval=FALSE}
+system.time({
+  result <- expensive_function(data)
+})
+
+Rprof("profile.out")
+result <- expensive_function(data)
+Rprof(NULL)
+summaryRprof("profile.out")
+```
+
+Profiling examples are not executed here because they require a real workload
+and create output files.
+
+## Interview checkpoints
+
+- Explain the `d`, `p`, `q`, and `r` distribution prefixes.
+- Explain what `set.seed()` guarantees and what it does not.
+- Distinguish sampling with and without replacement.
+- Describe a data-generating process for a simple linear model.
+- Explain what uncertainty a nonparametric bootstrap represents.

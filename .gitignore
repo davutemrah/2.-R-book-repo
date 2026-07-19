@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+_book/
+_bookdown_files/
+*_files/
+*.knit.md
+*.utf8.md
+*.nb.html
+__REPO/archive/

@@ -1,0 +1,167 @@
+# Control Flow and Functions
+
+Control flow determines which expressions run and how often they run.
+Functions package those decisions into reusable units that can be tested and
+combined.
+
+## Scalar decisions
+
+An `if` condition must represent one logical decision. Test missingness before
+using a value in a condition because `if (NA)` cannot choose a branch.
+
+```{r scalar-condition}
+classify_score <- function(score) {
+  if (is.na(score)) {
+    "missing"
+  } else if (score >= 90) {
+    "high"
+  } else if (score >= 70) {
+    "medium"
+  } else {
+    "low"
+  }
+}
+
+classify_score(84)
+classify_score(NA_real_)
+```
+
+Use `&&` and `||` for scalar control-flow conditions. They evaluate from left
+to right and stop as soon as the result is known.
+
+```{r short-circuiting}
+is_valid_rate <- function(x) {
+  length(x) == 1L && !is.na(x) && x >= 0 && x <= 1
+}
+
+is_valid_rate(0.4)
+is_valid_rate(NA_real_)
+```
+
+## Vectorized decisions
+
+`ifelse()` chooses element by element. It is convenient for simple recoding,
+but the output type is determined by its branches and may not preserve every
+class attribute.
+
+```{r vectorized-condition}
+response_times <- c(1.2, 2.8, NA, 4.1)
+status <- ifelse(
+  is.na(response_times),
+  "missing",
+  ifelse(response_times <= 3, "on time", "late")
+)
+status
+```
+
+For complex business rules, write explicit tests and verify that categories
+are mutually exclusive and collectively exhaustive.
+
+## `for` loops
+
+A loop is appropriate when each step has side effects or depends on previous
+steps. Preallocate the result instead of repeatedly growing an object.
+
+```{r preallocated-loop}
+inputs <- c(2, 4, 6, 8)
+squared <- numeric(length(inputs))
+
+for (i in seq_along(inputs)) {
+  squared[i] <- inputs[i]^2
+}
+
+squared
+```
+
+`seq_along(x)` safely handles an empty vector, unlike `1:length(x)`.
+
+## `while` loops
+
+A `while` loop is useful when the number of iterations is not known in advance.
+Its state must move toward a stopping condition.
+
+```{r while-loop}
+remaining <- 100
+periods <- 0L
+
+while (remaining > 10) {
+  remaining <- remaining * 0.6
+  periods <- periods + 1L
+}
+
+c(periods = periods, remaining = remaining)
+```
+
+In production code, consider a maximum-iteration guard when convergence is not
+guaranteed.
+
+## Function contracts
+
+A useful function has a focused responsibility, meaningful argument names,
+and clear behavior for invalid input.
+
+```{r function-contract}
+weighted_mean <- function(x, weights, na.rm = FALSE) {
+  if (!is.numeric(x) || !is.numeric(weights)) {
+    stop("x and weights must be numeric.")
+  }
+  if (length(x) != length(weights)) {
+    stop("x and weights must have equal lengths.")
+  }
+  if (any(weights < 0, na.rm = TRUE)) {
+    stop("weights must be non-negative.")
+  }
+
+  stats::weighted.mean(x, weights, na.rm = na.rm)
+}
+
+weighted_mean(c(10, 20, 30), c(1, 2, 1))
+```
+
+Defaults should be safe and unsurprising. Validate assumptions close to the
+function boundary so failures explain what is wrong.
+
+## Lexical scope and closures
+
+R resolves names in the environment where a function was created. A closure is
+a function bundled with that environment.
+
+```{r closure-example}
+make_counter <- function(start = 0L) {
+  value <- as.integer(start)
+
+  function() {
+    value <<- value + 1L
+    value
+  }
+}
+
+counter <- make_counter(10)
+counter()
+counter()
+```
+
+`<<-` changes a binding outside the current function. It can support deliberate
+state, caching, or counters, but ordinary analysis functions should usually
+return a value instead of modifying hidden state.
+
+## Pure functions
+
+A pure function returns the same result for the same inputs and does not alter
+external state. Pure functions are easier to test and reuse.
+
+```{r pure-function}
+standardize <- function(x) {
+  (x - mean(x)) / stats::sd(x)
+}
+
+round(standardize(c(10, 12, 14, 16)), 3)
+```
+
+## Interview checkpoints
+
+- Distinguish scalar `if` from vectorized `ifelse()`.
+- Explain short-circuit evaluation with `&&` and `||`.
+- Explain why preallocation matters in a loop.
+- Describe lexical scope, closures, and the risks of `<<-`.
+- Define a pure function and explain why it is easier to test.

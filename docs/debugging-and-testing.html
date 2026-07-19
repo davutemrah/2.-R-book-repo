@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>R for Data Science</title>
+  <title>Chapter 8 Debugging and Testing | R for Data Science</title>
   <meta name="description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="R for Data Science" />
+  <meta property="og:title" content="Chapter 8 Debugging and Testing | R for Data Science" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="R for Data Science" />
+  <meta name="twitter:title" content="Chapter 8 Debugging and Testing | R for Data Science" />
   
   <meta name="twitter:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
+<link rel="prev" href="simulation-and-reproducibility.html"/>
 
-<link rel="next" href="r-foundations.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -248,27 +248,132 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">R for Data Science</h1>
-<p class="author"><em>Davut Ayan</em></p>
-</div>
-<div id="welcome" class="section level1 unnumbered hasAnchor">
-<h1>Welcome<a href="index.html#welcome" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>This book is a practical guide to R for data-science work. It is designed for
-structured study, quick reference, and technical interview preparation.</p>
-<p>The initial chapters focus on core language concepts and data structures. The
-book will grow through small, reviewed additions covering functions, iteration,
-data manipulation, visualization, reproducibility, and modeling workflow.</p>
-<div id="how-to-use-this-book" class="section level2 unnumbered hasAnchor">
-<h2>How to use this book<a href="index.html#how-to-use-this-book" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="debugging-and-testing" class="section level1 hasAnchor" number="8">
+<h1><span class="header-section-number">Chapter 8</span> Debugging and Testing<a href="debugging-and-testing.html#debugging-and-testing" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Debugging is the process of reducing a failure to a reproducible cause. Testing
+turns the expected behavior into checks that detect future regressions.</p>
+<div id="conditions-in-r" class="section level2 hasAnchor" number="8.1">
+<h2><span class="header-section-number">8.1</span> Conditions in R<a href="debugging-and-testing.html#conditions-in-r" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>R communicates problems through conditions:</p>
 <ul>
-<li>Run examples and change small inputs to test your understanding.</li>
-<li>Focus on object types, vectorization, indexing, and missing-value behavior.</li>
-<li>Explain each result in plain language rather than memorizing syntax.</li>
-<li>Review the failure modes and assumptions before using a pattern in real work.</li>
+<li>A <strong>message</strong> reports progress or context.</li>
+<li>A <strong>warning</strong> signals a concern while allowing evaluation to continue.</li>
+<li>An <strong>error</strong> stops the current evaluation.</li>
 </ul>
-<p>Older assignments and practice exercises are retained as source material but
-are not automatically part of the published book.</p>
+<p>A function should fail early when continuing would produce a misleading
+result.</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb60-1"><a href="debugging-and-testing.html#cb60-1" tabindex="-1"></a>safe_log <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb60-2"><a href="debugging-and-testing.html#cb60-2" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.numeric</span>(x) <span class="sc">||</span> <span class="fu">any</span>(<span class="sc">!</span><span class="fu">is.finite</span>(x)) <span class="sc">||</span> <span class="fu">any</span>(x <span class="sc">&lt;=</span> <span class="dv">0</span>)) {</span>
+<span id="cb60-3"><a href="debugging-and-testing.html#cb60-3" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">&quot;x must contain positive finite numbers.&quot;</span>)</span>
+<span id="cb60-4"><a href="debugging-and-testing.html#cb60-4" tabindex="-1"></a>  }</span>
+<span id="cb60-5"><a href="debugging-and-testing.html#cb60-5" tabindex="-1"></a>  <span class="fu">log</span>(x)</span>
+<span id="cb60-6"><a href="debugging-and-testing.html#cb60-6" tabindex="-1"></a>}</span>
+<span id="cb60-7"><a href="debugging-and-testing.html#cb60-7" tabindex="-1"></a></span>
+<span id="cb60-8"><a href="debugging-and-testing.html#cb60-8" tabindex="-1"></a><span class="fu">safe_log</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">exp</span>(<span class="dv">1</span>)))</span>
+<span id="cb60-9"><a href="debugging-and-testing.html#cb60-9" tabindex="-1"></a><span class="co">#&gt; [1] 0 1</span></span></code></pre></div>
+</div>
+<div id="capture-expected-failures" class="section level2 hasAnchor" number="8.2">
+<h2><span class="header-section-number">8.2</span> Capture expected failures<a href="debugging-and-testing.html#capture-expected-failures" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>tryCatch()</code> handles a condition deliberately. Do not use it merely to hide an
+unexpected error.</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb61-1"><a href="debugging-and-testing.html#cb61-1" tabindex="-1"></a>captured_message <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
+<span id="cb61-2"><a href="debugging-and-testing.html#cb61-2" tabindex="-1"></a>  <span class="fu">safe_log</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>)),</span>
+<span id="cb61-3"><a href="debugging-and-testing.html#cb61-3" tabindex="-1"></a>  <span class="at">error =</span> <span class="cf">function</span>(condition) <span class="fu">conditionMessage</span>(condition)</span>
+<span id="cb61-4"><a href="debugging-and-testing.html#cb61-4" tabindex="-1"></a>)</span>
+<span id="cb61-5"><a href="debugging-and-testing.html#cb61-5" tabindex="-1"></a></span>
+<span id="cb61-6"><a href="debugging-and-testing.html#cb61-6" tabindex="-1"></a>captured_message</span>
+<span id="cb61-7"><a href="debugging-and-testing.html#cb61-7" tabindex="-1"></a><span class="co">#&gt; [1] &quot;x must contain positive finite numbers.&quot;</span></span></code></pre></div>
+<p>The handler converts this intentionally demonstrated error into a value, so the
+book can test the expected message without globally allowing failures.</p>
+</div>
+<div id="a-reproducible-debugging-workflow" class="section level2 hasAnchor" number="8.3">
+<h2><span class="header-section-number">8.3</span> A reproducible debugging workflow<a href="debugging-and-testing.html#a-reproducible-debugging-workflow" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ol style="list-style-type: decimal">
+<li>Record the exact error and call that triggered it.</li>
+<li>Reduce the input to the smallest example that still fails.</li>
+<li>Inspect structure with <code>str()</code>, <code>class()</code>, <code>typeof()</code>, <code>length()</code>, and
+<code>names()</code>.</li>
+<li>Check assumptions at the boundary where the data enter the function.</li>
+<li>Fix the cause and add a test that would have caught it.</li>
+</ol>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb62-1"><a href="debugging-and-testing.html#cb62-1" tabindex="-1"></a>unexpected_input <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb62-2"><a href="debugging-and-testing.html#cb62-2" tabindex="-1"></a>  <span class="at">amount =</span> <span class="fu">c</span>(<span class="st">&quot;10&quot;</span>, <span class="st">&quot;20&quot;</span>, <span class="st">&quot;unknown&quot;</span>)</span>
+<span id="cb62-3"><a href="debugging-and-testing.html#cb62-3" tabindex="-1"></a>)</span>
+<span id="cb62-4"><a href="debugging-and-testing.html#cb62-4" tabindex="-1"></a></span>
+<span id="cb62-5"><a href="debugging-and-testing.html#cb62-5" tabindex="-1"></a><span class="fu">str</span>(unexpected_input)</span>
+<span id="cb62-6"><a href="debugging-and-testing.html#cb62-6" tabindex="-1"></a><span class="co">#&gt; &#39;data.frame&#39;:    3 obs. of  1 variable:</span></span>
+<span id="cb62-7"><a href="debugging-and-testing.html#cb62-7" tabindex="-1"></a><span class="co">#&gt;  $ amount: chr  &quot;10&quot; &quot;20&quot; &quot;unknown&quot;</span></span></code></pre></div>
+<p>The structure reveals that <code>amount</code> is character. Converting blindly would
+turn the unexpected label into a missing value, so validate allowed text first.</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb63-1"><a href="debugging-and-testing.html#cb63-1" tabindex="-1"></a>parse_amount <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb63-2"><a href="debugging-and-testing.html#cb63-2" tabindex="-1"></a>  valid_number <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">&quot;^[0-9]+([.][0-9]+)?$&quot;</span>, x)</span>
+<span id="cb63-3"><a href="debugging-and-testing.html#cb63-3" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">any</span>(<span class="sc">!</span>valid_number)) {</span>
+<span id="cb63-4"><a href="debugging-and-testing.html#cb63-4" tabindex="-1"></a>    <span class="fu">stop</span>(<span class="st">&quot;amount contains a non-numeric label.&quot;</span>)</span>
+<span id="cb63-5"><a href="debugging-and-testing.html#cb63-5" tabindex="-1"></a>  }</span>
+<span id="cb63-6"><a href="debugging-and-testing.html#cb63-6" tabindex="-1"></a>  <span class="fu">as.numeric</span>(x)</span>
+<span id="cb63-7"><a href="debugging-and-testing.html#cb63-7" tabindex="-1"></a>}</span>
+<span id="cb63-8"><a href="debugging-and-testing.html#cb63-8" tabindex="-1"></a></span>
+<span id="cb63-9"><a href="debugging-and-testing.html#cb63-9" tabindex="-1"></a><span class="fu">parse_amount</span>(<span class="fu">c</span>(<span class="st">&quot;10&quot;</span>, <span class="st">&quot;20.5&quot;</span>))</span>
+<span id="cb63-10"><a href="debugging-and-testing.html#cb63-10" tabindex="-1"></a><span class="co">#&gt; [1] 10.0 20.5</span></span></code></pre></div>
+</div>
+<div id="interactive-tools" class="section level2 hasAnchor" number="8.4">
+<h2><span class="header-section-number">8.4</span> Interactive tools<a href="debugging-and-testing.html#interactive-tools" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Use these tools during an interactive debugging session:</p>
+<ul>
+<li><code>traceback()</code> displays the call stack after an error.</li>
+<li><code>browser()</code> pauses inside a function.</li>
+<li><code>debugonce(function_name)</code> opens the debugger on the next call.</li>
+<li><code>recover()</code> lets you inspect active call frames after an error.</li>
+</ul>
+<div class="sourceCode" id="cb64"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb64-1"><a href="debugging-and-testing.html#cb64-1" tabindex="-1"></a><span class="fu">options</span>(<span class="at">error =</span> recover)</span>
+<span id="cb64-2"><a href="debugging-and-testing.html#cb64-2" tabindex="-1"></a><span class="fu">debugonce</span>(model_function)</span>
+<span id="cb64-3"><a href="debugging-and-testing.html#cb64-3" tabindex="-1"></a><span class="fu">model_function</span>(data)</span>
+<span id="cb64-4"><a href="debugging-and-testing.html#cb64-4" tabindex="-1"></a><span class="fu">options</span>(<span class="at">error =</span> <span class="cn">NULL</span>)</span></code></pre></div>
+<p>Do not leave global debugging options enabled in reproducible scripts.</p>
+</div>
+<div id="lightweight-assertions" class="section level2 hasAnchor" number="8.5">
+<h2><span class="header-section-number">8.5</span> Lightweight assertions<a href="debugging-and-testing.html#lightweight-assertions" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>stopifnot()</code> is useful for internal invariants and compact checks.</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb65-1"><a href="debugging-and-testing.html#cb65-1" tabindex="-1"></a>normalize_weights <span class="ot">&lt;-</span> <span class="cf">function</span>(weights) {</span>
+<span id="cb65-2"><a href="debugging-and-testing.html#cb65-2" tabindex="-1"></a>  <span class="fu">stopifnot</span>(</span>
+<span id="cb65-3"><a href="debugging-and-testing.html#cb65-3" tabindex="-1"></a>    <span class="fu">is.numeric</span>(weights),</span>
+<span id="cb65-4"><a href="debugging-and-testing.html#cb65-4" tabindex="-1"></a>    <span class="fu">length</span>(weights) <span class="sc">&gt;</span> <span class="dv">0</span><span class="dt">L</span>,</span>
+<span id="cb65-5"><a href="debugging-and-testing.html#cb65-5" tabindex="-1"></a>    <span class="fu">all</span>(<span class="fu">is.finite</span>(weights)),</span>
+<span id="cb65-6"><a href="debugging-and-testing.html#cb65-6" tabindex="-1"></a>    <span class="fu">all</span>(weights <span class="sc">&gt;=</span> <span class="dv">0</span>),</span>
+<span id="cb65-7"><a href="debugging-and-testing.html#cb65-7" tabindex="-1"></a>    <span class="fu">sum</span>(weights) <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb65-8"><a href="debugging-and-testing.html#cb65-8" tabindex="-1"></a>  )</span>
+<span id="cb65-9"><a href="debugging-and-testing.html#cb65-9" tabindex="-1"></a></span>
+<span id="cb65-10"><a href="debugging-and-testing.html#cb65-10" tabindex="-1"></a>  weights <span class="sc">/</span> <span class="fu">sum</span>(weights)</span>
+<span id="cb65-11"><a href="debugging-and-testing.html#cb65-11" tabindex="-1"></a>}</span>
+<span id="cb65-12"><a href="debugging-and-testing.html#cb65-12" tabindex="-1"></a></span>
+<span id="cb65-13"><a href="debugging-and-testing.html#cb65-13" tabindex="-1"></a>normalized_weights <span class="ot">&lt;-</span> <span class="fu">normalize_weights</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb65-14"><a href="debugging-and-testing.html#cb65-14" tabindex="-1"></a><span class="fu">stopifnot</span>(<span class="fu">abs</span>(<span class="fu">sum</span>(normalized_weights) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">&lt;</span> <span class="fl">1e-12</span>)</span>
+<span id="cb65-15"><a href="debugging-and-testing.html#cb65-15" tabindex="-1"></a>normalized_weights</span>
+<span id="cb65-16"><a href="debugging-and-testing.html#cb65-16" tabindex="-1"></a><span class="co">#&gt; [1] 0.25 0.50 0.25</span></span></code></pre></div>
+<p>For a larger package or application, use a testing framework such as
+<code>testthat</code> so tests are organized, named, and run automatically.</p>
+</div>
+<div id="test-boundaries-and-edge-cases" class="section level2 hasAnchor" number="8.6">
+<h2><span class="header-section-number">8.6</span> Test boundaries and edge cases<a href="debugging-and-testing.html#test-boundaries-and-edge-cases" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>At minimum, test:</p>
+<ul>
+<li>typical valid input;</li>
+<li>empty or length-zero input;</li>
+<li>missing and non-finite values;</li>
+<li>invalid types and out-of-range values;</li>
+<li>boundary values where conditions change;</li>
+<li>properties that must always hold, such as normalized weights summing to one.</li>
+</ul>
+</div>
+<div id="interview-checkpoints-7" class="section level2 hasAnchor" number="8.7">
+<h2><span class="header-section-number">8.7</span> Interview checkpoints<a href="debugging-and-testing.html#interview-checkpoints-7" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li>Distinguish messages, warnings, and errors.</li>
+<li>Explain when <code>tryCatch()</code> is appropriate.</li>
+<li>Describe how you reduce a failure to a minimal reproducible example.</li>
+<li>Compare input validation with internal assertions.</li>
+<li>Name important edge cases for a data-processing function.</li>
+</ul>
 
 </div>
 </div>
@@ -277,8 +382,8 @@ are not automatically part of the published book.</p>
           </div>
         </div>
       </div>
+<a href="simulation-and-reproducibility.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
 
-<a href="r-foundations.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

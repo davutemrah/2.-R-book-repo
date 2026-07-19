@@ -1,0 +1,131 @@
+# Iteration and Grouped Operations
+
+Iteration means applying a computation repeatedly. In R, the best choice may
+be vectorized arithmetic, a clear loop, or a member of the apply family. Choose
+the form that makes the input and output structure explicit.
+
+## Start with vectorization
+
+Vectorized functions express many common operations directly.
+
+```{r iteration-vectorization}
+values_to_scale <- c(2, 5, 8, 11)
+(values_to_scale - mean(values_to_scale)) / sd(values_to_scale)
+```
+
+Vectorization is not a rule against loops. Use a loop when it communicates the
+algorithm more clearly or each iteration depends on previous state.
+
+## `lapply()` and `vapply()`
+
+`lapply()` always returns a list. It works naturally with data frames because a
+data frame is a list of equal-length columns.
+
+```{r lapply-example}
+sample_data <- data.frame(
+  units = c(5, 8, 6),
+  price = c(12.5, 11.0, 13.0),
+  region = c("north", "south", "west")
+)
+
+lapply(sample_data, class)
+```
+
+`vapply()` requires an output template. It fails early if a result has an
+unexpected type or length.
+
+```{r vapply-example}
+vapply(sample_data, typeof, character(1))
+```
+
+`sapply()` attempts to simplify automatically. It is convenient interactively,
+but `vapply()` is safer when downstream code requires a stable contract.
+
+## Iterating over several inputs
+
+`Map()` applies a function across inputs in parallel and returns a list.
+`mapply()` uses similar logic and attempts to simplify.
+
+```{r map-example}
+means <- c(0, 5, 10)
+standard_deviations <- c(1, 2, 3)
+
+Map(
+  function(mu, sigma) c(lower = mu - sigma, upper = mu + sigma),
+  means,
+  standard_deviations
+)
+```
+
+## Matrices and margins
+
+`apply(x, margin, fun)` operates over matrix or array margins. A margin of `1`
+means rows and `2` means columns.
+
+```{r matrix-apply}
+measurement_matrix <- matrix(1:12, nrow = 3, byrow = TRUE)
+
+apply(measurement_matrix, 1, max)
+apply(measurement_matrix, 2, mean)
+```
+
+Prefer specialized functions such as `rowSums()`, `rowMeans()`, `colSums()`,
+and `colMeans()` when they express the calculation directly.
+
+```{r matrix-specialized}
+rowSums(measurement_matrix)
+colMeans(measurement_matrix)
+```
+
+## Split–apply–combine
+
+Many data-analysis tasks split observations into groups, apply a summary, and
+combine the results.
+
+```{r split-apply-combine}
+transactions <- data.frame(
+  segment = c("new", "new", "returning", "returning"),
+  revenue = c(25, 35, 60, 80)
+)
+
+by_segment <- split(transactions$revenue, transactions$segment)
+vapply(by_segment, mean, numeric(1))
+```
+
+`tapply()` provides a compact form for a vector grouped by one or more factors.
+
+```{r tapply-example}
+tapply(transactions$revenue, transactions$segment, mean)
+```
+
+`aggregate()` returns a data frame and is convenient when several grouping
+columns must remain explicit.
+
+```{r aggregate-example}
+aggregate(revenue ~ segment, data = transactions, FUN = mean)
+```
+
+## Stateful iteration
+
+When the next value depends on the previous value, a loop is usually clearer
+than forcing the problem into an apply function.
+
+```{r stateful-iteration}
+growth_rates <- c(0.10, -0.05, 0.20)
+balance_path <- numeric(length(growth_rates) + 1L)
+balance_path[1] <- 100
+
+for (i in seq_along(growth_rates)) {
+  balance_path[i + 1L] <- balance_path[i] * (1 + growth_rates[i])
+}
+
+round(balance_path, 2)
+```
+
+## Interview checkpoints
+
+- Compare `lapply()`, `sapply()`, and `vapply()`.
+- Explain what the `MARGIN` argument means in `apply()`.
+- Describe split–apply–combine and name two R implementations.
+- Explain when a `for` loop is clearer than an apply-family function.
+- Explain why `rowMeans()` is preferable to `apply(x, 1, mean)` when applicable.

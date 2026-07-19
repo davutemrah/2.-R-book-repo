@@ -1,0 +1,137 @@
+# Missing and Non-finite Values
+
+Missingness is part of the data-generating process, not merely a cleaning
+inconvenience. Before removing or imputing values, ask why they are absent and
+whether that absence contains information.
+
+## `NA`, `NaN`, and infinity
+
+R distinguishes missing values from non-finite numerical results.
+
+```{r nonfinite-values}
+special_values <- c(10, NA_real_, NaN, Inf, -Inf)
+
+is.na(special_values)
+is.nan(special_values)
+is.infinite(special_values)
+is.finite(special_values)
+```
+
+`is.na()` is also `TRUE` for `NaN`, while `is.nan()` identifies only undefined
+numeric results such as `0 / 0`.
+
+## Missingness propagates
+
+R does not silently discard missing values from most summaries.
+
+```{r missing-propagation}
+observed_scores <- c(72, 85, NA, 91)
+
+mean(observed_scores)
+mean(observed_scores, na.rm = TRUE)
+```
+
+Using `na.rm = TRUE` changes the population being summarized. Make that choice
+deliberately and report how many observations were excluded.
+
+```{r missing-counts}
+c(
+  total = length(observed_scores),
+  missing = sum(is.na(observed_scores)),
+  observed = sum(!is.na(observed_scores))
+)
+```
+
+## Row completeness
+
+`complete.cases()` identifies rows without missing values across selected
+variables.
+
+```{r complete-cases}
+applications <- data.frame(
+  applicant_id = 1:5,
+  income = c(60, 75, NA, 90, 68),
+  debt = c(20, NA, 25, 30, 18),
+  approved = c(TRUE, FALSE, TRUE, TRUE, FALSE)
+)
+
+analysis_columns <- c("income", "debt", "approved")
+complete_rows <- complete.cases(applications[analysis_columns])
+
+applications[complete_rows, ]
+```
+
+Complete-case analysis is valid only under assumptions about why values are
+missing. It can reduce precision and introduce bias when missingness is related
+to the outcome or predictors.
+
+## Missingness mechanisms
+
+Three common conceptual categories are:
+
+- **MCAR:** missingness is unrelated to observed or unobserved values.
+- **MAR:** after conditioning on observed information, missingness does not
+  depend on the missing value itself.
+- **MNAR:** missingness still depends on unobserved information or the missing
+  value after conditioning on observed data.
+
+These mechanisms are assumptions about the process, not labels that can
+usually be proven from the dataset alone.
+
+## Simple imputation
+
+Median imputation can be a reasonable baseline for a numeric predictor, but it
+reduces variation and does not automatically remove bias.
+
+```{r median-imputation}
+training_income <- c(55, 62, 70, NA, 88)
+training_median <- median(training_income, na.rm = TRUE)
+
+impute_median <- function(x, value) {
+  x[is.na(x)] <- value
+  x
+}
+
+impute_median(training_income, training_median)
+```
+
+For predictive modeling, estimate the imputation value using the training data
+only, then apply that saved value to validation, test, and future data. Fitting
+preprocessing on the full dataset leaks information across the evaluation
+boundary.
+
+## Missing indicators
+
+Sometimes the fact that a value is missing is predictive. A missingness
+indicator can preserve that signal, but it does not eliminate the need to
+understand the missingness process.
+
+```{r missing-indicator}
+applications$income_missing <- is.na(applications$income)
+applications$income_imputed <- impute_median(
+  applications$income,
+  median(applications$income, na.rm = TRUE)
+)
+
+applications[c("applicant_id", "income_missing", "income_imputed")]
+```
+
+## Safe comparisons
+
+Comparing a missing value with `==` produces `NA`, not a Boolean answer.
+
+```{r safe-missing-comparison}
+applications$income == NA
+is.na(applications$income)
+```
+
+Use `is.na()` for missingness and `is.finite()` when a calculation requires an
+ordinary finite number.
+
+## Interview checkpoints
+
+- Distinguish `NA`, `NaN`, and `Inf`.
+- Explain why `x == NA` does not test missingness.
+- Describe MCAR, MAR, and MNAR as assumptions.
+- Explain how preprocessing can leak information from validation or test data.
+- Discuss one benefit and one limitation of a missingness indicator.

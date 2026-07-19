@@ -1,37 +1,27 @@
---- 
-title: "R Programming Notes for Data Science"
-author: "DEA"
-date: "`r Sys.Date()`"
+---
+title: "R for Data Science"
+author: "Davut Ayan"
 site: bookdown::bookdown_site
 output: bookdown::gitbook
 documentclass: book
-bibliography: [book.bib, packages.bib]
-biblio-style: apalike
-link-citations: yes
-#github-repo: rstudio/bookdown-demo
-#github-repo: davutemrah/python_book-repo
-description: "These are my notes that I find useful when using R analyzing data"
-
+description: "Practical R notes for data-science learning, reference, and interview preparation."
 ---
 
-# Acknowledgement
+# Welcome {-}
 
-This is a personal notebook open for public use. I have collected these notes, codes and best practices that I find useful to remind myself on R programming language.
+This book is a practical guide to R for data-science work. It is designed for
+structured study, quick reference, and technical interview preparation.
 
-All these content are free to use and share.
+The initial chapters focus on core language concepts and data structures. The
+book will grow through small, reviewed additions covering functions, iteration,
+data manipulation, visualization, reproducibility, and modeling workflow.
 
-```{r, include=FALSE}
-# when building book be careful!
+## How to use this book {-}
 
-# there are options under `Build Book` drop down menu
-# 1. bookdown::gitbook()
-# 4. bookdown::bs4_book()
+- Run examples and change small inputs to test your understanding.
+- Focus on object types, vectorization, indexing, and missing-value behavior.
+- Explain each result in plain language rather than memorizing syntax.
+- Review the failure modes and assumptions before using a pattern in real work.
 
-```
-
-```{r include=FALSE}
-# automatically create a bib database for R packages
-knitr::write_bib(c(
-  .packages(), 'bookdown', 'knitr', 'rmarkdown'
-), 'packages.bib')
-```
+Older assignments and practice exercises are retained as source material but
+are not automatically part of the published book.

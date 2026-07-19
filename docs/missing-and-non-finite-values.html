@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>R for Data Science</title>
+  <title>Chapter 6 Missing and Non-finite Values | R for Data Science</title>
   <meta name="description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="R for Data Science" />
+  <meta property="og:title" content="Chapter 6 Missing and Non-finite Values | R for Data Science" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="R for Data Science" />
+  <meta name="twitter:title" content="Chapter 6 Missing and Non-finite Values | R for Data Science" />
   
   <meta name="twitter:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="r-foundations.html"/>
+<link rel="prev" href="data-manipulation.html"/>
+<link rel="next" href="simulation-and-reproducibility.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -248,27 +248,139 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">R for Data Science</h1>
-<p class="author"><em>Davut Ayan</em></p>
+<div id="missing-and-non-finite-values" class="section level1 hasAnchor" number="6">
+<h1><span class="header-section-number">Chapter 6</span> Missing and Non-finite Values<a href="missing-and-non-finite-values.html#missing-and-non-finite-values" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Missingness is part of the data-generating process, not merely a cleaning
+inconvenience. Before removing or imputing values, ask why they are absent and
+whether that absence contains information.</p>
+<div id="na-nan-and-infinity" class="section level2 hasAnchor" number="6.1">
+<h2><span class="header-section-number">6.1</span> <code>NA</code>, <code>NaN</code>, and infinity<a href="missing-and-non-finite-values.html#na-nan-and-infinity" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>R distinguishes missing values from non-finite numerical results.</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb46-1"><a href="missing-and-non-finite-values.html#cb46-1" tabindex="-1"></a>special_values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="cn">NA_real_</span>, <span class="cn">NaN</span>, <span class="cn">Inf</span>, <span class="sc">-</span><span class="cn">Inf</span>)</span>
+<span id="cb46-2"><a href="missing-and-non-finite-values.html#cb46-2" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="missing-and-non-finite-values.html#cb46-3" tabindex="-1"></a><span class="fu">is.na</span>(special_values)</span>
+<span id="cb46-4"><a href="missing-and-non-finite-values.html#cb46-4" tabindex="-1"></a><span class="co">#&gt; [1] FALSE  TRUE  TRUE FALSE FALSE</span></span>
+<span id="cb46-5"><a href="missing-and-non-finite-values.html#cb46-5" tabindex="-1"></a><span class="fu">is.nan</span>(special_values)</span>
+<span id="cb46-6"><a href="missing-and-non-finite-values.html#cb46-6" tabindex="-1"></a><span class="co">#&gt; [1] FALSE FALSE  TRUE FALSE FALSE</span></span>
+<span id="cb46-7"><a href="missing-and-non-finite-values.html#cb46-7" tabindex="-1"></a><span class="fu">is.infinite</span>(special_values)</span>
+<span id="cb46-8"><a href="missing-and-non-finite-values.html#cb46-8" tabindex="-1"></a><span class="co">#&gt; [1] FALSE FALSE FALSE  TRUE  TRUE</span></span>
+<span id="cb46-9"><a href="missing-and-non-finite-values.html#cb46-9" tabindex="-1"></a><span class="fu">is.finite</span>(special_values)</span>
+<span id="cb46-10"><a href="missing-and-non-finite-values.html#cb46-10" tabindex="-1"></a><span class="co">#&gt; [1]  TRUE FALSE FALSE FALSE FALSE</span></span></code></pre></div>
+<p><code>is.na()</code> is also <code>TRUE</code> for <code>NaN</code>, while <code>is.nan()</code> identifies only undefined
+numeric results such as <code>0 / 0</code>.</p>
 </div>
-<div id="welcome" class="section level1 unnumbered hasAnchor">
-<h1>Welcome<a href="index.html#welcome" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>This book is a practical guide to R for data-science work. It is designed for
-structured study, quick reference, and technical interview preparation.</p>
-<p>The initial chapters focus on core language concepts and data structures. The
-book will grow through small, reviewed additions covering functions, iteration,
-data manipulation, visualization, reproducibility, and modeling workflow.</p>
-<div id="how-to-use-this-book" class="section level2 unnumbered hasAnchor">
-<h2>How to use this book<a href="index.html#how-to-use-this-book" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="missingness-propagates" class="section level2 hasAnchor" number="6.2">
+<h2><span class="header-section-number">6.2</span> Missingness propagates<a href="missing-and-non-finite-values.html#missingness-propagates" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>R does not silently discard missing values from most summaries.</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb47-1"><a href="missing-and-non-finite-values.html#cb47-1" tabindex="-1"></a>observed_scores <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">72</span>, <span class="dv">85</span>, <span class="cn">NA</span>, <span class="dv">91</span>)</span>
+<span id="cb47-2"><a href="missing-and-non-finite-values.html#cb47-2" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="missing-and-non-finite-values.html#cb47-3" tabindex="-1"></a><span class="fu">mean</span>(observed_scores)</span>
+<span id="cb47-4"><a href="missing-and-non-finite-values.html#cb47-4" tabindex="-1"></a><span class="co">#&gt; [1] NA</span></span>
+<span id="cb47-5"><a href="missing-and-non-finite-values.html#cb47-5" tabindex="-1"></a><span class="fu">mean</span>(observed_scores, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb47-6"><a href="missing-and-non-finite-values.html#cb47-6" tabindex="-1"></a><span class="co">#&gt; [1] 82.66667</span></span></code></pre></div>
+<p>Using <code>na.rm = TRUE</code> changes the population being summarized. Make that choice
+deliberately and report how many observations were excluded.</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb48-1"><a href="missing-and-non-finite-values.html#cb48-1" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb48-2"><a href="missing-and-non-finite-values.html#cb48-2" tabindex="-1"></a>  <span class="at">total =</span> <span class="fu">length</span>(observed_scores),</span>
+<span id="cb48-3"><a href="missing-and-non-finite-values.html#cb48-3" tabindex="-1"></a>  <span class="at">missing =</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(observed_scores)),</span>
+<span id="cb48-4"><a href="missing-and-non-finite-values.html#cb48-4" tabindex="-1"></a>  <span class="at">observed =</span> <span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(observed_scores))</span>
+<span id="cb48-5"><a href="missing-and-non-finite-values.html#cb48-5" tabindex="-1"></a>)</span>
+<span id="cb48-6"><a href="missing-and-non-finite-values.html#cb48-6" tabindex="-1"></a><span class="co">#&gt;    total  missing observed </span></span>
+<span id="cb48-7"><a href="missing-and-non-finite-values.html#cb48-7" tabindex="-1"></a><span class="co">#&gt;        4        1        3</span></span></code></pre></div>
+</div>
+<div id="row-completeness" class="section level2 hasAnchor" number="6.3">
+<h2><span class="header-section-number">6.3</span> Row completeness<a href="missing-and-non-finite-values.html#row-completeness" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>complete.cases()</code> identifies rows without missing values across selected
+variables.</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb49-1"><a href="missing-and-non-finite-values.html#cb49-1" tabindex="-1"></a>applications <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb49-2"><a href="missing-and-non-finite-values.html#cb49-2" tabindex="-1"></a>  <span class="at">applicant_id =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,</span>
+<span id="cb49-3"><a href="missing-and-non-finite-values.html#cb49-3" tabindex="-1"></a>  <span class="at">income =</span> <span class="fu">c</span>(<span class="dv">60</span>, <span class="dv">75</span>, <span class="cn">NA</span>, <span class="dv">90</span>, <span class="dv">68</span>),</span>
+<span id="cb49-4"><a href="missing-and-non-finite-values.html#cb49-4" tabindex="-1"></a>  <span class="at">debt =</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="cn">NA</span>, <span class="dv">25</span>, <span class="dv">30</span>, <span class="dv">18</span>),</span>
+<span id="cb49-5"><a href="missing-and-non-finite-values.html#cb49-5" tabindex="-1"></a>  <span class="at">approved =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>, <span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span>)</span>
+<span id="cb49-6"><a href="missing-and-non-finite-values.html#cb49-6" tabindex="-1"></a>)</span>
+<span id="cb49-7"><a href="missing-and-non-finite-values.html#cb49-7" tabindex="-1"></a></span>
+<span id="cb49-8"><a href="missing-and-non-finite-values.html#cb49-8" tabindex="-1"></a>analysis_columns <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;income&quot;</span>, <span class="st">&quot;debt&quot;</span>, <span class="st">&quot;approved&quot;</span>)</span>
+<span id="cb49-9"><a href="missing-and-non-finite-values.html#cb49-9" tabindex="-1"></a>complete_rows <span class="ot">&lt;-</span> <span class="fu">complete.cases</span>(applications[analysis_columns])</span>
+<span id="cb49-10"><a href="missing-and-non-finite-values.html#cb49-10" tabindex="-1"></a></span>
+<span id="cb49-11"><a href="missing-and-non-finite-values.html#cb49-11" tabindex="-1"></a>applications[complete_rows, ]</span>
+<span id="cb49-12"><a href="missing-and-non-finite-values.html#cb49-12" tabindex="-1"></a><span class="co">#&gt;   applicant_id income debt approved</span></span>
+<span id="cb49-13"><a href="missing-and-non-finite-values.html#cb49-13" tabindex="-1"></a><span class="co">#&gt; 1            1     60   20     TRUE</span></span>
+<span id="cb49-14"><a href="missing-and-non-finite-values.html#cb49-14" tabindex="-1"></a><span class="co">#&gt; 4            4     90   30     TRUE</span></span>
+<span id="cb49-15"><a href="missing-and-non-finite-values.html#cb49-15" tabindex="-1"></a><span class="co">#&gt; 5            5     68   18    FALSE</span></span></code></pre></div>
+<p>Complete-case analysis is valid only under assumptions about why values are
+missing. It can reduce precision and introduce bias when missingness is related
+to the outcome or predictors.</p>
+</div>
+<div id="missingness-mechanisms" class="section level2 hasAnchor" number="6.4">
+<h2><span class="header-section-number">6.4</span> Missingness mechanisms<a href="missing-and-non-finite-values.html#missingness-mechanisms" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Three common conceptual categories are:</p>
 <ul>
-<li>Run examples and change small inputs to test your understanding.</li>
-<li>Focus on object types, vectorization, indexing, and missing-value behavior.</li>
-<li>Explain each result in plain language rather than memorizing syntax.</li>
-<li>Review the failure modes and assumptions before using a pattern in real work.</li>
+<li><strong>MCAR:</strong> missingness is unrelated to observed or unobserved values.</li>
+<li><strong>MAR:</strong> after conditioning on observed information, missingness does not
+depend on the missing value itself.</li>
+<li><strong>MNAR:</strong> missingness still depends on unobserved information or the missing
+value after conditioning on observed data.</li>
 </ul>
-<p>Older assignments and practice exercises are retained as source material but
-are not automatically part of the published book.</p>
+<p>These mechanisms are assumptions about the process, not labels that can
+usually be proven from the dataset alone.</p>
+</div>
+<div id="simple-imputation" class="section level2 hasAnchor" number="6.5">
+<h2><span class="header-section-number">6.5</span> Simple imputation<a href="missing-and-non-finite-values.html#simple-imputation" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Median imputation can be a reasonable baseline for a numeric predictor, but it
+reduces variation and does not automatically remove bias.</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb50-1"><a href="missing-and-non-finite-values.html#cb50-1" tabindex="-1"></a>training_income <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">55</span>, <span class="dv">62</span>, <span class="dv">70</span>, <span class="cn">NA</span>, <span class="dv">88</span>)</span>
+<span id="cb50-2"><a href="missing-and-non-finite-values.html#cb50-2" tabindex="-1"></a>training_median <span class="ot">&lt;-</span> <span class="fu">median</span>(training_income, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb50-3"><a href="missing-and-non-finite-values.html#cb50-3" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="missing-and-non-finite-values.html#cb50-4" tabindex="-1"></a>impute_median <span class="ot">&lt;-</span> <span class="cf">function</span>(x, value) {</span>
+<span id="cb50-5"><a href="missing-and-non-finite-values.html#cb50-5" tabindex="-1"></a>  x[<span class="fu">is.na</span>(x)] <span class="ot">&lt;-</span> value</span>
+<span id="cb50-6"><a href="missing-and-non-finite-values.html#cb50-6" tabindex="-1"></a>  x</span>
+<span id="cb50-7"><a href="missing-and-non-finite-values.html#cb50-7" tabindex="-1"></a>}</span>
+<span id="cb50-8"><a href="missing-and-non-finite-values.html#cb50-8" tabindex="-1"></a></span>
+<span id="cb50-9"><a href="missing-and-non-finite-values.html#cb50-9" tabindex="-1"></a><span class="fu">impute_median</span>(training_income, training_median)</span>
+<span id="cb50-10"><a href="missing-and-non-finite-values.html#cb50-10" tabindex="-1"></a><span class="co">#&gt; [1] 55 62 70 66 88</span></span></code></pre></div>
+<p>For predictive modeling, estimate the imputation value using the training data
+only, then apply that saved value to validation, test, and future data. Fitting
+preprocessing on the full dataset leaks information across the evaluation
+boundary.</p>
+</div>
+<div id="missing-indicators" class="section level2 hasAnchor" number="6.6">
+<h2><span class="header-section-number">6.6</span> Missing indicators<a href="missing-and-non-finite-values.html#missing-indicators" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Sometimes the fact that a value is missing is predictive. A missingness
+indicator can preserve that signal, but it does not eliminate the need to
+understand the missingness process.</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb51-1"><a href="missing-and-non-finite-values.html#cb51-1" tabindex="-1"></a>applications<span class="sc">$</span>income_missing <span class="ot">&lt;-</span> <span class="fu">is.na</span>(applications<span class="sc">$</span>income)</span>
+<span id="cb51-2"><a href="missing-and-non-finite-values.html#cb51-2" tabindex="-1"></a>applications<span class="sc">$</span>income_imputed <span class="ot">&lt;-</span> <span class="fu">impute_median</span>(</span>
+<span id="cb51-3"><a href="missing-and-non-finite-values.html#cb51-3" tabindex="-1"></a>  applications<span class="sc">$</span>income,</span>
+<span id="cb51-4"><a href="missing-and-non-finite-values.html#cb51-4" tabindex="-1"></a>  <span class="fu">median</span>(applications<span class="sc">$</span>income, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb51-5"><a href="missing-and-non-finite-values.html#cb51-5" tabindex="-1"></a>)</span>
+<span id="cb51-6"><a href="missing-and-non-finite-values.html#cb51-6" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="missing-and-non-finite-values.html#cb51-7" tabindex="-1"></a>applications[<span class="fu">c</span>(<span class="st">&quot;applicant_id&quot;</span>, <span class="st">&quot;income_missing&quot;</span>, <span class="st">&quot;income_imputed&quot;</span>)]</span>
+<span id="cb51-8"><a href="missing-and-non-finite-values.html#cb51-8" tabindex="-1"></a><span class="co">#&gt;   applicant_id income_missing income_imputed</span></span>
+<span id="cb51-9"><a href="missing-and-non-finite-values.html#cb51-9" tabindex="-1"></a><span class="co">#&gt; 1            1          FALSE           60.0</span></span>
+<span id="cb51-10"><a href="missing-and-non-finite-values.html#cb51-10" tabindex="-1"></a><span class="co">#&gt; 2            2          FALSE           75.0</span></span>
+<span id="cb51-11"><a href="missing-and-non-finite-values.html#cb51-11" tabindex="-1"></a><span class="co">#&gt; 3            3           TRUE           71.5</span></span>
+<span id="cb51-12"><a href="missing-and-non-finite-values.html#cb51-12" tabindex="-1"></a><span class="co">#&gt; 4            4          FALSE           90.0</span></span>
+<span id="cb51-13"><a href="missing-and-non-finite-values.html#cb51-13" tabindex="-1"></a><span class="co">#&gt; 5            5          FALSE           68.0</span></span></code></pre></div>
+</div>
+<div id="safe-comparisons" class="section level2 hasAnchor" number="6.7">
+<h2><span class="header-section-number">6.7</span> Safe comparisons<a href="missing-and-non-finite-values.html#safe-comparisons" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Comparing a missing value with <code>==</code> produces <code>NA</code>, not a Boolean answer.</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb52-1"><a href="missing-and-non-finite-values.html#cb52-1" tabindex="-1"></a>applications<span class="sc">$</span>income <span class="sc">==</span> <span class="cn">NA</span></span>
+<span id="cb52-2"><a href="missing-and-non-finite-values.html#cb52-2" tabindex="-1"></a><span class="co">#&gt; [1] NA NA NA NA NA</span></span>
+<span id="cb52-3"><a href="missing-and-non-finite-values.html#cb52-3" tabindex="-1"></a><span class="fu">is.na</span>(applications<span class="sc">$</span>income)</span>
+<span id="cb52-4"><a href="missing-and-non-finite-values.html#cb52-4" tabindex="-1"></a><span class="co">#&gt; [1] FALSE FALSE  TRUE FALSE FALSE</span></span></code></pre></div>
+<p>Use <code>is.na()</code> for missingness and <code>is.finite()</code> when a calculation requires an
+ordinary finite number.</p>
+</div>
+<div id="interview-checkpoints-5" class="section level2 hasAnchor" number="6.8">
+<h2><span class="header-section-number">6.8</span> Interview checkpoints<a href="missing-and-non-finite-values.html#interview-checkpoints-5" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<ul>
+<li>Distinguish <code>NA</code>, <code>NaN</code>, and <code>Inf</code>.</li>
+<li>Explain why <code>x == NA</code> does not test missingness.</li>
+<li>Describe MCAR, MAR, and MNAR as assumptions.</li>
+<li>Explain how preprocessing can leak information from validation or test data.</li>
+<li>Discuss one benefit and one limitation of a missingness indicator.</li>
+</ul>
 
 </div>
 </div>
@@ -277,8 +389,8 @@ are not automatically part of the published book.</p>
           </div>
         </div>
       </div>
-
-<a href="r-foundations.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="data-manipulation.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="simulation-and-reproducibility.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

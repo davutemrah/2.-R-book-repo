@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>R for Data Science</title>
+  <title>Chapter 4 Iteration and Grouped Operations | R for Data Science</title>
   <meta name="description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   <meta name="generator" content="bookdown 0.35 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="R for Data Science" />
+  <meta property="og:title" content="Chapter 4 Iteration and Grouped Operations | R for Data Science" />
   <meta property="og:type" content="book" />
   
   <meta property="og:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="R for Data Science" />
+  <meta name="twitter:title" content="Chapter 4 Iteration and Grouped Operations | R for Data Science" />
   
   <meta name="twitter:description" content="Practical R notes for data-science learning, reference, and interview preparation." />
   
@@ -29,8 +29,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="r-foundations.html"/>
+<link rel="prev" href="control-flow-and-functions.html"/>
+<link rel="next" href="data-manipulation.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -248,27 +248,136 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">R for Data Science</h1>
-<p class="author"><em>Davut Ayan</em></p>
+<div id="iteration-and-grouped-operations" class="section level1 hasAnchor" number="4">
+<h1><span class="header-section-number">Chapter 4</span> Iteration and Grouped Operations<a href="iteration-and-grouped-operations.html#iteration-and-grouped-operations" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>Iteration means applying a computation repeatedly. In R, the best choice may
+be vectorized arithmetic, a clear loop, or a member of the apply family. Choose
+the form that makes the input and output structure explicit.</p>
+<div id="start-with-vectorization" class="section level2 hasAnchor" number="4.1">
+<h2><span class="header-section-number">4.1</span> Start with vectorization<a href="iteration-and-grouped-operations.html#start-with-vectorization" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Vectorized functions express many common operations directly.</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="iteration-and-grouped-operations.html#cb28-1" tabindex="-1"></a>values_to_scale <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">11</span>)</span>
+<span id="cb28-2"><a href="iteration-and-grouped-operations.html#cb28-2" tabindex="-1"></a>(values_to_scale <span class="sc">-</span> <span class="fu">mean</span>(values_to_scale)) <span class="sc">/</span> <span class="fu">sd</span>(values_to_scale)</span>
+<span id="cb28-3"><a href="iteration-and-grouped-operations.html#cb28-3" tabindex="-1"></a><span class="co">#&gt; [1] -1.1618950 -0.3872983  0.3872983  1.1618950</span></span></code></pre></div>
+<p>Vectorization is not a rule against loops. Use a loop when it communicates the
+algorithm more clearly or each iteration depends on previous state.</p>
 </div>
-<div id="welcome" class="section level1 unnumbered hasAnchor">
-<h1>Welcome<a href="index.html#welcome" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<p>This book is a practical guide to R for data-science work. It is designed for
-structured study, quick reference, and technical interview preparation.</p>
-<p>The initial chapters focus on core language concepts and data structures. The
-book will grow through small, reviewed additions covering functions, iteration,
-data manipulation, visualization, reproducibility, and modeling workflow.</p>
-<div id="how-to-use-this-book" class="section level2 unnumbered hasAnchor">
-<h2>How to use this book<a href="index.html#how-to-use-this-book" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<div id="lapply-and-vapply" class="section level2 hasAnchor" number="4.2">
+<h2><span class="header-section-number">4.2</span> <code>lapply()</code> and <code>vapply()</code><a href="iteration-and-grouped-operations.html#lapply-and-vapply" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>lapply()</code> always returns a list. It works naturally with data frames because a
+data frame is a list of equal-length columns.</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="iteration-and-grouped-operations.html#cb29-1" tabindex="-1"></a>sample_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb29-2"><a href="iteration-and-grouped-operations.html#cb29-2" tabindex="-1"></a>  <span class="at">units =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">8</span>, <span class="dv">6</span>),</span>
+<span id="cb29-3"><a href="iteration-and-grouped-operations.html#cb29-3" tabindex="-1"></a>  <span class="at">price =</span> <span class="fu">c</span>(<span class="fl">12.5</span>, <span class="fl">11.0</span>, <span class="fl">13.0</span>),</span>
+<span id="cb29-4"><a href="iteration-and-grouped-operations.html#cb29-4" tabindex="-1"></a>  <span class="at">region =</span> <span class="fu">c</span>(<span class="st">&quot;north&quot;</span>, <span class="st">&quot;south&quot;</span>, <span class="st">&quot;west&quot;</span>)</span>
+<span id="cb29-5"><a href="iteration-and-grouped-operations.html#cb29-5" tabindex="-1"></a>)</span>
+<span id="cb29-6"><a href="iteration-and-grouped-operations.html#cb29-6" tabindex="-1"></a></span>
+<span id="cb29-7"><a href="iteration-and-grouped-operations.html#cb29-7" tabindex="-1"></a><span class="fu">lapply</span>(sample_data, class)</span>
+<span id="cb29-8"><a href="iteration-and-grouped-operations.html#cb29-8" tabindex="-1"></a><span class="co">#&gt; $units</span></span>
+<span id="cb29-9"><a href="iteration-and-grouped-operations.html#cb29-9" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
+<span id="cb29-10"><a href="iteration-and-grouped-operations.html#cb29-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb29-11"><a href="iteration-and-grouped-operations.html#cb29-11" tabindex="-1"></a><span class="co">#&gt; $price</span></span>
+<span id="cb29-12"><a href="iteration-and-grouped-operations.html#cb29-12" tabindex="-1"></a><span class="co">#&gt; [1] &quot;numeric&quot;</span></span>
+<span id="cb29-13"><a href="iteration-and-grouped-operations.html#cb29-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb29-14"><a href="iteration-and-grouped-operations.html#cb29-14" tabindex="-1"></a><span class="co">#&gt; $region</span></span>
+<span id="cb29-15"><a href="iteration-and-grouped-operations.html#cb29-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;character&quot;</span></span></code></pre></div>
+<p><code>vapply()</code> requires an output template. It fails early if a result has an
+unexpected type or length.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="iteration-and-grouped-operations.html#cb30-1" tabindex="-1"></a><span class="fu">vapply</span>(sample_data, typeof, <span class="fu">character</span>(<span class="dv">1</span>))</span>
+<span id="cb30-2"><a href="iteration-and-grouped-operations.html#cb30-2" tabindex="-1"></a><span class="co">#&gt;       units       price      region </span></span>
+<span id="cb30-3"><a href="iteration-and-grouped-operations.html#cb30-3" tabindex="-1"></a><span class="co">#&gt;    &quot;double&quot;    &quot;double&quot; &quot;character&quot;</span></span></code></pre></div>
+<p><code>sapply()</code> attempts to simplify automatically. It is convenient interactively,
+but <code>vapply()</code> is safer when downstream code requires a stable contract.</p>
+</div>
+<div id="iterating-over-several-inputs" class="section level2 hasAnchor" number="4.3">
+<h2><span class="header-section-number">4.3</span> Iterating over several inputs<a href="iteration-and-grouped-operations.html#iterating-over-several-inputs" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>Map()</code> applies a function across inputs in parallel and returns a list.
+<code>mapply()</code> uses similar logic and attempts to simplify.</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="iteration-and-grouped-operations.html#cb31-1" tabindex="-1"></a>means <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">10</span>)</span>
+<span id="cb31-2"><a href="iteration-and-grouped-operations.html#cb31-2" tabindex="-1"></a>standard_deviations <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>)</span>
+<span id="cb31-3"><a href="iteration-and-grouped-operations.html#cb31-3" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="iteration-and-grouped-operations.html#cb31-4" tabindex="-1"></a><span class="fu">Map</span>(</span>
+<span id="cb31-5"><a href="iteration-and-grouped-operations.html#cb31-5" tabindex="-1"></a>  <span class="cf">function</span>(mu, sigma) <span class="fu">c</span>(<span class="at">lower =</span> mu <span class="sc">-</span> sigma, <span class="at">upper =</span> mu <span class="sc">+</span> sigma),</span>
+<span id="cb31-6"><a href="iteration-and-grouped-operations.html#cb31-6" tabindex="-1"></a>  means,</span>
+<span id="cb31-7"><a href="iteration-and-grouped-operations.html#cb31-7" tabindex="-1"></a>  standard_deviations</span>
+<span id="cb31-8"><a href="iteration-and-grouped-operations.html#cb31-8" tabindex="-1"></a>)</span>
+<span id="cb31-9"><a href="iteration-and-grouped-operations.html#cb31-9" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb31-10"><a href="iteration-and-grouped-operations.html#cb31-10" tabindex="-1"></a><span class="co">#&gt; lower upper </span></span>
+<span id="cb31-11"><a href="iteration-and-grouped-operations.html#cb31-11" tabindex="-1"></a><span class="co">#&gt;    -1     1 </span></span>
+<span id="cb31-12"><a href="iteration-and-grouped-operations.html#cb31-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb31-13"><a href="iteration-and-grouped-operations.html#cb31-13" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb31-14"><a href="iteration-and-grouped-operations.html#cb31-14" tabindex="-1"></a><span class="co">#&gt; lower upper </span></span>
+<span id="cb31-15"><a href="iteration-and-grouped-operations.html#cb31-15" tabindex="-1"></a><span class="co">#&gt;     3     7 </span></span>
+<span id="cb31-16"><a href="iteration-and-grouped-operations.html#cb31-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb31-17"><a href="iteration-and-grouped-operations.html#cb31-17" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb31-18"><a href="iteration-and-grouped-operations.html#cb31-18" tabindex="-1"></a><span class="co">#&gt; lower upper </span></span>
+<span id="cb31-19"><a href="iteration-and-grouped-operations.html#cb31-19" tabindex="-1"></a><span class="co">#&gt;     7    13</span></span></code></pre></div>
+</div>
+<div id="matrices-and-margins" class="section level2 hasAnchor" number="4.4">
+<h2><span class="header-section-number">4.4</span> Matrices and margins<a href="iteration-and-grouped-operations.html#matrices-and-margins" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p><code>apply(x, margin, fun)</code> operates over matrix or array margins. A margin of <code>1</code>
+means rows and <code>2</code> means columns.</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="iteration-and-grouped-operations.html#cb32-1" tabindex="-1"></a>measurement_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb32-2"><a href="iteration-and-grouped-operations.html#cb32-2" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="iteration-and-grouped-operations.html#cb32-3" tabindex="-1"></a><span class="fu">apply</span>(measurement_matrix, <span class="dv">1</span>, max)</span>
+<span id="cb32-4"><a href="iteration-and-grouped-operations.html#cb32-4" tabindex="-1"></a><span class="co">#&gt; [1]  4  8 12</span></span>
+<span id="cb32-5"><a href="iteration-and-grouped-operations.html#cb32-5" tabindex="-1"></a><span class="fu">apply</span>(measurement_matrix, <span class="dv">2</span>, mean)</span>
+<span id="cb32-6"><a href="iteration-and-grouped-operations.html#cb32-6" tabindex="-1"></a><span class="co">#&gt; [1] 5 6 7 8</span></span></code></pre></div>
+<p>Prefer specialized functions such as <code>rowSums()</code>, <code>rowMeans()</code>, <code>colSums()</code>,
+and <code>colMeans()</code> when they express the calculation directly.</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="iteration-and-grouped-operations.html#cb33-1" tabindex="-1"></a><span class="fu">rowSums</span>(measurement_matrix)</span>
+<span id="cb33-2"><a href="iteration-and-grouped-operations.html#cb33-2" tabindex="-1"></a><span class="co">#&gt; [1] 10 26 42</span></span>
+<span id="cb33-3"><a href="iteration-and-grouped-operations.html#cb33-3" tabindex="-1"></a><span class="fu">colMeans</span>(measurement_matrix)</span>
+<span id="cb33-4"><a href="iteration-and-grouped-operations.html#cb33-4" tabindex="-1"></a><span class="co">#&gt; [1] 5 6 7 8</span></span></code></pre></div>
+</div>
+<div id="splitapplycombine" class="section level2 hasAnchor" number="4.5">
+<h2><span class="header-section-number">4.5</span> Split–apply–combine<a href="iteration-and-grouped-operations.html#splitapplycombine" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>Many data-analysis tasks split observations into groups, apply a summary, and
+combine the results.</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="iteration-and-grouped-operations.html#cb34-1" tabindex="-1"></a>transactions <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb34-2"><a href="iteration-and-grouped-operations.html#cb34-2" tabindex="-1"></a>  <span class="at">segment =</span> <span class="fu">c</span>(<span class="st">&quot;new&quot;</span>, <span class="st">&quot;new&quot;</span>, <span class="st">&quot;returning&quot;</span>, <span class="st">&quot;returning&quot;</span>),</span>
+<span id="cb34-3"><a href="iteration-and-grouped-operations.html#cb34-3" tabindex="-1"></a>  <span class="at">revenue =</span> <span class="fu">c</span>(<span class="dv">25</span>, <span class="dv">35</span>, <span class="dv">60</span>, <span class="dv">80</span>)</span>
+<span id="cb34-4"><a href="iteration-and-grouped-operations.html#cb34-4" tabindex="-1"></a>)</span>
+<span id="cb34-5"><a href="iteration-and-grouped-operations.html#cb34-5" tabindex="-1"></a></span>
+<span id="cb34-6"><a href="iteration-and-grouped-operations.html#cb34-6" tabindex="-1"></a>by_segment <span class="ot">&lt;-</span> <span class="fu">split</span>(transactions<span class="sc">$</span>revenue, transactions<span class="sc">$</span>segment)</span>
+<span id="cb34-7"><a href="iteration-and-grouped-operations.html#cb34-7" tabindex="-1"></a><span class="fu">vapply</span>(by_segment, mean, <span class="fu">numeric</span>(<span class="dv">1</span>))</span>
+<span id="cb34-8"><a href="iteration-and-grouped-operations.html#cb34-8" tabindex="-1"></a><span class="co">#&gt;       new returning </span></span>
+<span id="cb34-9"><a href="iteration-and-grouped-operations.html#cb34-9" tabindex="-1"></a><span class="co">#&gt;        30        70</span></span></code></pre></div>
+<p><code>tapply()</code> provides a compact form for a vector grouped by one or more factors.</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="iteration-and-grouped-operations.html#cb35-1" tabindex="-1"></a><span class="fu">tapply</span>(transactions<span class="sc">$</span>revenue, transactions<span class="sc">$</span>segment, mean)</span>
+<span id="cb35-2"><a href="iteration-and-grouped-operations.html#cb35-2" tabindex="-1"></a><span class="co">#&gt;       new returning </span></span>
+<span id="cb35-3"><a href="iteration-and-grouped-operations.html#cb35-3" tabindex="-1"></a><span class="co">#&gt;        30        70</span></span></code></pre></div>
+<p><code>aggregate()</code> returns a data frame and is convenient when several grouping
+columns must remain explicit.</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="iteration-and-grouped-operations.html#cb36-1" tabindex="-1"></a><span class="fu">aggregate</span>(revenue <span class="sc">~</span> segment, <span class="at">data =</span> transactions, <span class="at">FUN =</span> mean)</span>
+<span id="cb36-2"><a href="iteration-and-grouped-operations.html#cb36-2" tabindex="-1"></a><span class="co">#&gt;     segment revenue</span></span>
+<span id="cb36-3"><a href="iteration-and-grouped-operations.html#cb36-3" tabindex="-1"></a><span class="co">#&gt; 1       new      30</span></span>
+<span id="cb36-4"><a href="iteration-and-grouped-operations.html#cb36-4" tabindex="-1"></a><span class="co">#&gt; 2 returning      70</span></span></code></pre></div>
+</div>
+<div id="stateful-iteration" class="section level2 hasAnchor" number="4.6">
+<h2><span class="header-section-number">4.6</span> Stateful iteration<a href="iteration-and-grouped-operations.html#stateful-iteration" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>When the next value depends on the previous value, a loop is usually clearer
+than forcing the problem into an apply function.</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="iteration-and-grouped-operations.html#cb37-1" tabindex="-1"></a>growth_rates <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.10</span>, <span class="sc">-</span><span class="fl">0.05</span>, <span class="fl">0.20</span>)</span>
+<span id="cb37-2"><a href="iteration-and-grouped-operations.html#cb37-2" tabindex="-1"></a>balance_path <span class="ot">&lt;-</span> <span class="fu">numeric</span>(<span class="fu">length</span>(growth_rates) <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>)</span>
+<span id="cb37-3"><a href="iteration-and-grouped-operations.html#cb37-3" tabindex="-1"></a>balance_path[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb37-4"><a href="iteration-and-grouped-operations.html#cb37-4" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="iteration-and-grouped-operations.html#cb37-5" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_along</span>(growth_rates)) {</span>
+<span id="cb37-6"><a href="iteration-and-grouped-operations.html#cb37-6" tabindex="-1"></a>  balance_path[i <span class="sc">+</span> <span class="dv">1</span><span class="dt">L</span>] <span class="ot">&lt;-</span> balance_path[i] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> growth_rates[i])</span>
+<span id="cb37-7"><a href="iteration-and-grouped-operations.html#cb37-7" tabindex="-1"></a>}</span>
+<span id="cb37-8"><a href="iteration-and-grouped-operations.html#cb37-8" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="iteration-and-grouped-operations.html#cb37-9" tabindex="-1"></a><span class="fu">round</span>(balance_path, <span class="dv">2</span>)</span>
+<span id="cb37-10"><a href="iteration-and-grouped-operations.html#cb37-10" tabindex="-1"></a><span class="co">#&gt; [1] 100.0 110.0 104.5 125.4</span></span></code></pre></div>
+</div>
+<div id="interview-checkpoints-3" class="section level2 hasAnchor" number="4.7">
+<h2><span class="header-section-number">4.7</span> Interview checkpoints<a href="iteration-and-grouped-operations.html#interview-checkpoints-3" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <ul>
-<li>Run examples and change small inputs to test your understanding.</li>
-<li>Focus on object types, vectorization, indexing, and missing-value behavior.</li>
-<li>Explain each result in plain language rather than memorizing syntax.</li>
-<li>Review the failure modes and assumptions before using a pattern in real work.</li>
+<li>Compare <code>lapply()</code>, <code>sapply()</code>, and <code>vapply()</code>.</li>
+<li>Explain what the <code>MARGIN</code> argument means in <code>apply()</code>.</li>
+<li>Describe split–apply–combine and name two R implementations.</li>
+<li>Explain when a <code>for</code> loop is clearer than an apply-family function.</li>
+<li>Explain why <code>rowMeans()</code> is preferable to <code>apply(x, 1, mean)</code> when applicable.</li>
 </ul>
-<p>Older assignments and practice exercises are retained as source material but
-are not automatically part of the published book.</p>
 
 </div>
 </div>
@@ -277,8 +386,8 @@ are not automatically part of the published book.</p>
           </div>
         </div>
       </div>
-
-<a href="r-foundations.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="control-flow-and-functions.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="data-manipulation.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

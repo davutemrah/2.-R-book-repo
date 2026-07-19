@@ -1,0 +1,161 @@
+# Vectors and Data Structures
+
+Choosing the correct data structure makes R code easier to reason about. The
+core structures differ by dimensionality and whether they permit mixed types.
+
+| Structure | Dimensions | Value types |
+| --- | ---: | --- |
+| Atomic vector | 1 | One underlying type |
+| Matrix | 2 | One underlying type |
+| List | 1 | Mixed objects allowed |
+| Data frame | 2 | Each column may have a different type |
+
+## Creating sequences
+
+Use `seq()` when the start, end, or increment should be explicit. Use
+`seq_along(x)` when indices must follow the length of another object.
+
+```{r sequences}
+seq(from = 2, to = 10, by = 2)
+seq_len(5)
+
+labels <- c("A", "B", "C")
+seq_along(labels)
+```
+
+`seq_along()` is safer than `1:length(x)` because it correctly returns an empty
+integer vector when `x` has length zero.
+
+## Indexing vectors
+
+R supports position, logical, and name-based indexing.
+
+```{r vector-indexing}
+sales <- c(north = 120, south = 95, west = 140, east = 110)
+
+sales[c(1, 3)]
+sales[sales >= 120]
+sales[c("north", "east")]
+```
+
+Negative positions exclude elements. Do not mix positive and negative
+positions in the same index.
+
+```{r negative-indexing}
+sales[-2]
+```
+
+## Matrices
+
+A matrix is an atomic vector with a two-dimensional `dim` attribute. Because a
+matrix has one underlying type, inserting character data coerces numeric values
+to character.
+
+```{r matrices}
+measurements <- matrix(
+  1:12,
+  nrow = 3,
+  byrow = TRUE,
+  dimnames = list(NULL, c("a", "b", "c", "d"))
+)
+
+measurements
+measurements[, c("a", "c"), drop = FALSE]
+```
+
+`drop = FALSE` preserves the matrix structure when a selection contains only
+one row or column.
+
+## Lists
+
+A list can contain objects of different types and sizes.
+
+```{r lists}
+model_summary <- list(
+  model = "linear regression",
+  coefficients = c(intercept = 1.2, slope = 0.8),
+  converged = TRUE
+)
+
+model_summary[["coefficients"]]
+model_summary["coefficients"]
+```
+
+`[[` extracts the object stored in one list element. `[` returns a sub-list.
+That distinction is a frequent interview question and a common source of
+unexpected results.
+
+## Data frames
+
+A data frame is a list of equal-length columns. Columns may use different
+types, but each column must have a consistent underlying type.
+
+```{r data-frames}
+customers <- data.frame(
+  customer_id = 101:104,
+  segment = c("new", "returning", "new", "returning"),
+  revenue = c(35.0, 82.5, 41.0, NA_real_)
+)
+
+str(customers)
+customers[customers$segment == "new", c("customer_id", "revenue")]
+```
+
+Use `NA_real_`, `NA_integer_`, and related typed missing values when the desired
+column type should be explicit.
+
+## Factors
+
+A factor stores categorical values as integer codes with associated labels.
+Use an ordered factor only when the levels have a meaningful ranking.
+
+```{r factors}
+priority <- factor(
+  c("medium", "high", "low", "medium"),
+  levels = c("low", "medium", "high"),
+  ordered = TRUE
+)
+
+priority
+priority > "low"
+```
+
+Never rely on alphabetical ordering when the domain defines the order.
+
+## Combining data
+
+`cbind()` combines objects by columns and `rbind()` combines them by rows. R
+may recycle shorter vectors, sometimes with only a warning, so validate lengths
+before combining independent inputs.
+
+```{r combining-data}
+customer_id <- 1:3
+revenue <- c(25, 40, 30)
+
+data.frame(customer_id, revenue)
+```
+
+For production analysis, prefer joining tables by explicit keys rather than
+assuming two independently created objects have the same row order.
+
+## Inspecting unfamiliar objects
+
+Use a small set of inspection functions before manipulating unfamiliar data.
+
+```{r inspecting-data}
+dim(customers)
+names(customers)
+head(customers, 2)
+summary(customers)
+```
+
+`str()` is usually the most concise first check because it exposes dimensions,
+column types, and representative values.
+
+## Interview checkpoints
+
+- Compare an atomic vector, matrix, list, and data frame.
+- Explain the difference between `[` and `[[` for lists.
+- Explain when matrix subsetting drops dimensions and how to prevent it.
+- Describe how factors store values and why explicit level order matters.
+- Explain why joining by keys is safer than relying on row order.
