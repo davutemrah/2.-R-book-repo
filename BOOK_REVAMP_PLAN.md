@@ -27,6 +27,24 @@ dependable R study book without losing useful source material.
   visualization, reproducibility, and modeling workflow.
 - Add exercises and solutions only after the explanatory chapters are stable.
 
+### Next recommended task — Review Chapter 1
+
+Before adding more chapters, review **Chapter 1: R Foundations** as the model
+for the rest of the book. The review should:
+
+- confirm that explanations are accurate, concise, and useful for data-science
+  interview preparation;
+- standardize terminology, headings, prose, and R code style;
+- run every example and check important assumptions, edge cases, and failure
+  modes;
+- remove unnecessary repetition while preserving useful teaching context;
+- add or refine interview checkpoints only where they test practical
+  understanding; and
+- rebuild the complete book and verify Chapter 1 in the local rendered site.
+
+Apply the resulting editorial pattern to later chapters only after Chapter 1
+has been reviewed and accepted.
+
 ## Phase 3 — Coursework curation
 
 - [x] Inventory coursework by topic, uniqueness, portability, attribution, and
